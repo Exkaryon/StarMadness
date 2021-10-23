@@ -1,0 +1,90 @@
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedSemibold.eot');
+	src: local('Boxed Semibold'), local('BoxedSemibold'),
+		url('../fonts/BoxedSemibold.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedSemibold.woff') format('woff'),
+		url('../fonts/BoxedSemibold.ttf') format('truetype');
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedThin.eot');
+	src: local('Boxed Thin'), local('BoxedThin'),
+		url('../fonts/BoxedThin.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedThin.woff') format('woff'),
+		url('../fonts/BoxedThin.ttf') format('truetype');
+	font-weight: 100;
+	font-style: normal;
+}
+
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedLight.eot');
+	src: local('Boxed Light'), local('BoxedLight'),
+		url('../fonts/BoxedLight.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedLight.woff') format('woff'),
+		url('../fonts/BoxedLight.ttf') format('truetype');
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedRegular-Bold.eot');
+	src: local('Boxed Regular Bold'), local('BoxedRegular-Bold'),
+		url('../fonts/BoxedRegular-Bold.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedRegular-Bold.woff') format('woff'),
+		url('../fonts/BoxedRegular-Bold.ttf') format('truetype');
+	font-weight: bold;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedHeavy.eot');
+	src: local('Boxed Heavy'), local('BoxedHeavy'),
+		url('../fonts/BoxedHeavy.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedHeavy.woff') format('woff'),
+		url('../fonts/BoxedHeavy.ttf') format('truetype');
+	font-weight: 900;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedMedium.eot');
+	src: local('Boxed Medium'), local('BoxedMedium'),
+		url('../fonts/BoxedMedium.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedMedium.woff') format('woff'),
+		url('../fonts/BoxedMedium.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedExtralight.eot');
+	src: local('Boxed Extralight'), local('BoxedExtralight'),
+		url('../fonts/BoxedExtralight.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedExtralight.woff') format('woff'),
+		url('../fonts/BoxedExtralight.ttf') format('truetype');
+	font-weight: 200;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Boxed';
+	src: url('../fonts/BoxedRegular.eot');
+	src: local('Boxed Regular'), local('BoxedRegular'),
+		url('../fonts/BoxedRegular.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/BoxedRegular.woff') format('woff'),
+		url('../fonts/BoxedRegular.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+}
+
+

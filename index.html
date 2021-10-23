@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="cache-control" content="no-cache">
+    <title>StarMadness</title>
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/dev.css" rel="stylesheet">
+    <link href="css/fonts.css" rel="stylesheet">
+</head>
+<body>
+    
+     <div class="info">
+        <div id="win_1">...</div>
+        <div id="win_2">...</div>
+        <div id="win_3">
+            <button id="pause">Pause / Resume</button>
+        </div>
+        <div id="win_4">...</div>
+    </div> 
+
+    <div id="gamescreen" class="wrapper inactive">
+        <canvas></canvas>
+        <div class="dashboard"></div>
+    </div>
+
+    
+
+    <div id="intro" class="wrapper">&nbsp;</div>
+
+
+    <div id="mainmenu" class="wrapper inactive">
+        <div class="menu">
+            <div class="logo"><img src="images/logo.png" alt=""><small>v0.9 alpha</small></div>
+            <div class="items">
+                <div data-item="multiplayer">Мультиплеер</div><br>
+                <div data-item="online" class="lock">Сетевая игра</div><br>
+                <div data-item="settings">Настройки</div><br>
+                <div data-item="exit">Выйти</div>
+            </div>
+        </div>
+        <div class="illuminator">
+            <video  poster="images/space_bg.jpg"> <!-- autoplay muted loop-->
+                <source src="images/serenity.mp4" type="video/mp4">
+            </video>
+            
+        </div>
+    </div>
+
+
+    <div id="local" class="wrapper inactive">
+        <div class="title">
+            <div>Мультиплеер</div>
+            <div>Лобби</div>
+        </div>
+        <div class="sets" data-setname="common"></div>
+        <div class="sets" data-setname="players"></div>
+        <div class="buttons">
+            <button class="tomenu blue">В меню</button>
+            <button class="tospace green">В бой</button>
+        </div>
+    </div>
+
+
+    <div id="online" class="wrapper inactive">
+        <div class="title">
+            <div>Сетевая игра</div>
+        </div>
+        <!-- Доступные серверы -->
+        <!-- Создать сервер -->
+        <!-- Лобби сервера -->
+    </div>
+
+
+    <div id="settings" class="wrapper inactive">Настройки</div>
+    <div id="hangar" class="wrapper inactive"></div>
+
+
+    
+    <script src="js/dev.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/library.js"></script>
+    <script src="js/effect.class.js"></script>
+    <script src="js/spaceship.class.js"></script>
+    <script src="js/bullet.class.js"></script>
+    <script src="js/celestial_body.class.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/dynamics.js"></script>
+
+    
+</body>
+</html>
