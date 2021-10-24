@@ -201,15 +201,13 @@ const universe = {
      /////// Метод столкновений объектов Вселенной. /////
     ////////////////////////////////////////////////////
     collider(){
-        let interactPairs = library.getInteractPairs(universe.objects);                             // Пересекающиеся окружности потенциального взаимодействия описанные вокруг каждого объекта.
+        let interactPairs = library.getInteractPairs(universe.objects);                         // Пересекающиеся окружности потенциального взаимодействия описанные вокруг каждого объекта.
         if(!interactPairs.length){
             this.collidedPairsData = {};
             return;
         }
 
-
         let collidedPairs = library.getCollidedPairs(interactPairs, universe.objects);          // Получение пар объектов, соприкоснувшиеся своими поверхностями.
-
         collidedPairs.forEach(pair => {                                                         // Запись текущих соприкоснувшихся пар в стек Вселенной, для которых будет произведен расчет рефлексии.
             const pairName = this.objects[pair[0]].id +'_&_'+this.objects[pair[1]].id;          // Строковое наименование пары, для создания суб-объекта учета данных столкновений.
             if(this.collidedPairsData[pairName]){                                               // Если пара есть в стеке, счетчик контакта пары инкреминтируется.
@@ -218,8 +216,6 @@ const universe = {
                 this.collidedPairsData[pairName] = {ids: pair, count: 0};
             }
         });
-
-
 
         // Расчет рефлексии для сучаев однократного столкновения пар и множественного (алтернативный расчет для неестественного поведения при столкновении).
         for (const pairName in this.collidedPairsData) {
@@ -238,14 +234,10 @@ const universe = {
             const CP = this.collidedPairsData[pairName];
             if(CP.count == 0){                                          // Случай первичного соприкосновения пары.
                 library.physicalImpact(CP.ids, this.objects);               // Расчет физических параметров пары, кроме кинетических.
-                if(this.objects[CP.ids[0]].paramsVariable.health > 0 && this.objects[CP.ids[1]].paramsVariable.health > 0){   // Если один из объектов уничтожен, кинетика пары не рассчитывается, для более естественного эффекта.
-                    library.kineticReflexion(CP.ids, this.objects);         // Расчет кинетики пары после столкновения.
-                }
+                library.kineticReflexion(CP.ids, this.objects);             // Расчет кинетики пары после столкновения.
             }else if(CP.count == 2){                                     // Случай множественного (третьего по счету) соприкосновения пары.
                 library.physicalImpact(CP.ids, this.objects);
-                if(this.objects[CP.ids[0]].paramsVariable.health > 0 && this.objects[CP.ids[1]].paramsVariable.health  > 0){
-                    library.nonGeomKineticReflexion(CP.ids, this.objects);
-                }
+                library.nonGeomKineticReflexion(CP.ids, this.objects);
             }
 
             // Проверка объектов пары на жизнеспособность после столкновения.
@@ -309,6 +301,10 @@ const universe = {
     },
 
 
+
+      //////////////////////////////////////////////
+     ///// Создание естественных небесных тел /////
+    //////////////////////////////////////////////
     celestialBodyCreator(){
         const bodies = library.randomizer(...config.gameSettings.gameplay.celestialBodies);
         for(let i = 0; i < bodies; i++){
@@ -318,6 +314,11 @@ const universe = {
         }
     },
 
+
+
+      //////////////////////////////////////////////////////////////////
+     ///// Создание осколков объектов Вселенной при их разрушении /////
+    //////////////////////////////////////////////////////////////////
     fragmentation(obj){
         if(!obj.paramsConst.fragmentation) return;
         const fragments = library.randomizer(0, obj.paramsConst.fragmentation);
@@ -327,6 +328,7 @@ const universe = {
             );
         }
     },
+
 
 
       //////////////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +473,7 @@ const universe = {
     ✓ 18. Необходимо разделить для космолетов метод motion на два метода impulse и motion поскольку это создает сложности при реализации визуализации спрайтов работы двигателей. Да и логически это совершенно разные методы.
     ✓ 19. Когда космолет мигает после возрождения он может залететь за границы пространства. Это связано с тем, что ему пристваивается неактивный статус interaction (+условие в quantumSwitch).  
 20. Возникло странное поведение дашборда при уничтожении космолетов: появилось мерцание. Предположительно, баг возникший при обновлении браузера.
-
+    ✓ 21. Нужно переделать метод колайдер, чтобы в кинетикрефлекшн передовались доп аргументы по условиям если health < 0 для объекта пары столкновения, то для него должна игнорироваться рефлексия.
 
 /* ВАРИАНТ РЕШЕНИЯ ЗАДАЧИ №21 ИЗ СПИСКА ЗАДАЧ. 
     // Расчет кинетики пары

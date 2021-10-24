@@ -244,32 +244,32 @@ const library = {
     ///////////////////////////////
     playSprites: function(context, obj){
         for (const [spriteName, frameCount] of Object.entries(obj.activeSprites)) {
-            if(frameCount !== false && obj.paramsConst.sprites[spriteName]){                                // Если для спрайта установлен не булево отрицание, а число, т.е. счет кадров, и спрайт с указанным именем существует у объекта.
-                if(!(universe.quantCounter % obj.paramsConst.sprites[spriteName].interval)){                // Если итерация Вселенной кратна интервалу обработки спрайта, выполняется инкрементация счетчика кадров спрайта и визуализация кадра соответсвующего числу счетчика.
-                    if(obj.activeSprites[spriteName] < obj.paramsConst.sprites[spriteName].frames){         // Если счетчик кадров не достиг максимального числа кадров спрайта, происходит его инкрементация, иначе сброс на первый кадр.
-                        obj.activeSprites[spriteName]++;
-                    }else{
-                        obj.activeSprites[spriteName] = obj.paramsConst.sprites[spriteName].loop ? 1 : 100; // Если тип анимации спрайта зацикленный, происходит сброс на первый кадр, иначе устанавливается несуществующий кадр, который далее будет учтен в условии прорисовки.
-                    }
-                }
+            if(frameCount === false || !obj.paramsConst.sprites[spriteName]) continue;                  // Если для спрайта установлено булево отрицание, а не число, т.е. счет кадров, или если спрайт с указанным именем не существует у объекта, операция для пары прерывается.
 
-                if(obj.activeSprites[spriteName] <= obj.paramsConst.sprites[spriteName].frames){            // Прорисовка кадров спрайтов, если счетчик кадров не превышает их кол-во. 
-                    context.save();
-                    context.translate(Math.ceil(obj.paramsVariable.fullFieldSize / 2), Math.ceil(obj.paramsVariable.fullFieldSize / 2));
-                    context.rotate(obj.paramsVariable.deg * Math.PI / 180);
-                    context.drawImage(
-                        obj.paramsConst.sprites[spriteName].pic,
-                        0,
-                        obj.paramsConst.sprites[spriteName].frameSize[1] * (obj.paramsConst.sprites[spriteName].single ? 0 : obj.activeSprites[spriteName] - 1),
-                        obj.paramsConst.sprites[spriteName].frameSize[0],
-                        obj.paramsConst.sprites[spriteName].frameSize[1],
-                        obj.paramsConst.sprites[spriteName].frameSize[0] / -2 + obj.paramsConst.sprites[spriteName].offset[0], 
-                        obj.paramsConst.sprites[spriteName].frameSize[1] / -2 + obj.paramsConst.sprites[spriteName].offset[1],
-                        obj.paramsConst.sprites[spriteName].frameSize[0],
-                        obj.paramsConst.sprites[spriteName].frameSize[1]
-                    );
-                    context.restore();
+            if(!(universe.quantCounter % obj.paramsConst.sprites[spriteName].interval)){                // Если итерация Вселенной кратна интервалу обработки спрайта, выполняется инкрементация счетчика кадров спрайта и визуализация кадра соответсвующего числу счетчика.
+                if(obj.activeSprites[spriteName] < obj.paramsConst.sprites[spriteName].frames){         // Если счетчик кадров не достиг максимального числа кадров спрайта, происходит его инкрементация, иначе сброс на первый кадр.
+                    obj.activeSprites[spriteName]++;
+                }else{
+                    obj.activeSprites[spriteName] = obj.paramsConst.sprites[spriteName].loop ? 1 : 100; // Если тип анимации спрайта зацикленный, происходит сброс на первый кадр, иначе устанавливается несуществующий кадр, который далее будет учтен в условии прорисовки.
                 }
+            }
+
+            if(obj.activeSprites[spriteName] <= obj.paramsConst.sprites[spriteName].frames){            // Прорисовка кадров спрайтов, если счетчик кадров не превышает их кол-во. 
+                context.save();
+                context.translate(Math.ceil(obj.paramsVariable.fullFieldSize / 2), Math.ceil(obj.paramsVariable.fullFieldSize / 2));
+                context.rotate(obj.paramsVariable.deg * Math.PI / 180);
+                context.drawImage(
+                    obj.paramsConst.sprites[spriteName].pic,
+                    0,
+                    obj.paramsConst.sprites[spriteName].frameSize[1] * (obj.paramsConst.sprites[spriteName].single ? 0 : obj.activeSprites[spriteName] - 1),
+                    obj.paramsConst.sprites[spriteName].frameSize[0],
+                    obj.paramsConst.sprites[spriteName].frameSize[1],
+                    obj.paramsConst.sprites[spriteName].frameSize[0] / -2 + obj.paramsConst.sprites[spriteName].offset[0], 
+                    obj.paramsConst.sprites[spriteName].frameSize[1] / -2 + obj.paramsConst.sprites[spriteName].offset[1],
+                    obj.paramsConst.sprites[spriteName].frameSize[0],
+                    obj.paramsConst.sprites[spriteName].frameSize[1]
+                );
+                context.restore();
             }
         };
     },
@@ -280,8 +280,7 @@ const library = {
      ///// Функция взаимодействия с границами игрового пространства объектов разного типа. /////
     ///////////////////////////////////////////////////////////////////////////////////////////
     boundaryLaw: function(obj , behavior){
-        if(obj.interaction != 'all' && obj.interaction != 'boundary') return;   // Выполнение метода игнорируется, если в свойстве объекта нет маркеров соответсвующих данному методу. 
-
+        if(obj.boundaryIgnore) return;                          // Если у объекта существует истинное свойство игнорирования границ, вычислений не происходит.
         let min, max;
         switch (obj.paramsConst.formType){
             case 'polygon':                                     // Если тип объекта полигональный (на основе вершин).
@@ -337,7 +336,7 @@ const library = {
         let pairs = [];                                                             // Пары ключей из массива universe.objects тех объектов, окружности которых пересеклись. 
         // Создание массива свойств объектов вселенной, который будет применен для создания пар взаимодествующих объектов для дальнейшего уточнения столкновений.
         objs.forEach((obj, key) => {
-            if(['all', 'physic', 'kinetic'].includes(obj.interaction)){                 // В стек параметров взаимодействующих объектов попадут только те объекты, у которых в свойстве interaction установлены маркеры характерные для взаимодействия с объектами Вселенной.
+            if(obj.interaction){                                                        // В стек параметров взаимодействующих объектов попадут только те объекты, для которых истино свойство interaction.
                 objParams.push({
                     key: key,                                                           // Ключ объекта в стеке объектов Вселенной (universe.objects)
                     id: obj.id,
@@ -525,14 +524,11 @@ const library = {
      ///// Метод ответных процедур на столкновения объектов, изменяющий кинетические параметры столкнувшихся пар объектов. /////    * Предназначен и выполняется точно для круглых и близких к круглым полигональных объектов, но может некорректно вычислять направления разлета для полигональных объектов иных форм.
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     kineticReflexion: function(pair, uniObjs){
-        // Выполнение метода игнорируется, если в свойстве хотя бы одного объекта нет маркеров соответсвующих данному методу. 
-        if(!['all', 'kinetic'].includes(uniObjs[pair[0]].interaction) || !['all', 'kinetic'].includes(uniObjs[pair[1]].interaction)) return;
-
         // Сборка параметров, необходимых для вычислений.
         let objs = [];
         pair.forEach(index => {
             objs.push({
-                indx:     index,
+                indx:     index,  
                 loc:      uniObjs[index].paramsVariable.location,
                 spd:      uniObjs[index].paramsVariable.currentSpeed,
                 rad:      uniObjs[index].paramsVariable.interactionFieldSize / 2,
@@ -608,10 +604,11 @@ const library = {
 
         // Сложение компонентов перпендикулярно направленных векторов, чтобы получить значения X и Y единого вектора для каждого из объектов.
         function calcNewSpeedVectors(){
-            objs.forEach(obj => {
-                uniObjs[obj.indx].paramsVariable.currentSpeed[0] = obj.newSpeed.components.trans.vmCorr[0] + obj.newSpeed.components.own.vector[0];
-                uniObjs[obj.indx].paramsVariable.currentSpeed[1] = obj.newSpeed.components.trans.vmCorr[1] + obj.newSpeed.components.own.vector[1];
-            });
+            for (const obj of objs) {
+                if( obj.health <= 0 ) continue;     // Если объект уничтожен, для него параметры скорости остаются прежними, чтобы в дальнейшем порожденный объектом эффект вел себя естественным образом, двигаясь дальше по той же траектории. 
+                obj.spd[0] = obj.newSpeed.components.trans.vmCorr[0] + obj.newSpeed.components.own.vector[0];
+                obj.spd[1] = obj.newSpeed.components.trans.vmCorr[1] + obj.newSpeed.components.own.vector[1];
+            }
         }
 
         triangleSolution();
@@ -625,8 +622,8 @@ const library = {
      ///// Метод негеометрического расчета ответных процедур на столкновения объектов . /////    * Выполняется в случае неестественного поведения при геометрической рефлексии (reflection) полигональных обектов.
     ////////////////////////////////////////////////////////////////////////////////////////
     nonGeomKineticReflexion: function(pair, uniObjs){
-        // Выполнение метода игнорируется, если в свойстве хотя бы одного объекта нет маркеров соответсвующих данному методу. 
-        if(!['all', 'kinetic'].includes(uniObjs[pair[0]].interaction) || !['all', 'kinetic'].includes(uniObjs[pair[1]].interaction)) return;
+
+        if(uniObjs[pair[0]].paramsVariable.health <= 0 || uniObjs[pair[1]].paramsVariable.health <= 0) return; // Если один из объектов пары уничтожен, то, соответсвенно, и считать уже нечего.
 
         let m1 = uniObjs[pair[0]].paramsConst.weight,
             m2 = uniObjs[pair[1]].paramsConst.weight,
@@ -650,9 +647,6 @@ const library = {
      ///// Метод расчета физических параметров пар объектов после столкновения. /////
     ////////////////////////////////////////////////////////////////////////////////
     physicalImpact: function(pair, objs){
-        // Выполнение метода игнорируется, если в свойстве хотя бы одного объекта нет маркеров соответсвующих данному методу. 
-        if(!['all', 'physic'].includes(objs[pair[0]].interaction) || !['all', 'physic'].includes(objs[pair[1]].interaction)) return;
-
         // Проверка, должна ли взаимодействовать пара исходя из набора игнорируемых моделей в стеках пары специального свойства ignoreModels.
         let ignore = false; 
         [1, 0].forEach((i, k) => {
@@ -663,9 +657,6 @@ const library = {
             }
         })
         if(ignore) return;
-
-
-        
         // Расчет физических свойств после взаимодействия. 
         const spdSum = Math.sqrt(                                                                                           // Расчет суммы скоростей пары объектов для дальнейшего вычисления воздействия на их свойство health.
                 Math.pow(objs[pair[0]].paramsVariable.currentSpeed[0] - objs[pair[1]].paramsVariable.currentSpeed[0], 2) +

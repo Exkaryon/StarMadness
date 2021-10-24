@@ -97,6 +97,7 @@ const render = {
         universe.objects.forEach((obj) => {
             // Если слоя для объекта еще не существует, его надо создать.
             if(!this.layers[obj.id]) this.layersGenerator(obj);
+            
             // Основные универсальные операции подготовки закадрового холста для модификаций. 
             if(obj.redraw){           // Справедливо только для тех объектов, которые нуждаются в перерисовке, то есть, для которых собственными методами установлен флаг redraw = true. 
                 this.layers[obj.id].ctx.clearRect(0, 0, this.layers[obj.id].canvas.width, this.layers[obj.id].canvas.height);
