@@ -96,6 +96,10 @@ const universe = {
                     for(let method in obj.activeActions){
                         if(obj.activeActions[method]) obj[method]();
                     }
+
+                    library.boundaryLaw(obj, config.gameSettings.gameplay.boundaryBehavior);    // Процедура взаимодействия объекта с границей игрового пространства (экрана).
+                    universe.spritesStateHandler(obj);                                          // Процедура отслеживания и изменения состояния спрайтов объектов.
+
                 }else{                                          // В противном случае, слушатели событий объекта, объект и его слой удаляются, запускается процесс возраждения.
                     if(universe.objects[key].playerIndex != undefined){                                                           // Операции только для объектов игроков (космолетов).
                         document.removeEventListener('keydown', universe.objects[key]['playerKeydownListener'+universe.objects[key].playerIndex]);
@@ -108,8 +112,6 @@ const universe = {
                     delete render.layers[key];
                     console.log('Йок!');
                 }
-                // Процедура взаимодействия объекта с границей игрового пространства (экрана).
-                library.boundaryLaw(obj, config.gameSettings.gameplay.boundaryBehavior);
             });
 
             // Обработка установленных таймеров.
@@ -212,21 +214,20 @@ const universe = {
             const pairName = this.objects[pair[0]].id +'_&_'+this.objects[pair[1]].id;          // Строковое наименование пары, для создания суб-объекта учета данных столкновений.
             if(this.collidedPairsData[pairName]){                                               // Если пара есть в стеке, счетчик контакта пары инкреминтируется.
                 this.collidedPairsData[pairName].count++;
-            }else{                                                                              // Если нет, данные о паре добавляются в стек
+            }else{                                                                              // Если нет, данные о паре добавляются в стек.
                 this.collidedPairsData[pairName] = {ids: pair, count: 0};
             }
         });
 
         // Расчет рефлексии для сучаев однократного столкновения пар и множественного (алтернативный расчет для неестественного поведения при столкновении).
         for (const pairName in this.collidedPairsData) {
-
             // Очистка стека от потерявших актуальность (разлетевшихся/разрушившихся) пар.
             let available = false;
             collidedPairs.forEach(pair => {
                 if(pairName == this.objects[pair[0]].id +'_&_'+this.objects[pair[1]].id) available = true;
             });
             if(!available) {
-                delete this.collidedPairsData[pairName]
+                delete this.collidedPairsData[pairName];
                 continue;
             }
 
@@ -253,11 +254,8 @@ const universe = {
                                 )
                             );
                     }
-                    if(this.objects[id].paramsConst.fragmentation){                                     // Если для объекта было установлено свойство фрагментации, он порождает осколки. 
-                        this.fragmentation(this.objects[id]);
-                    }
+                    if(this.objects[id].paramsConst.fragmentation) this.fragmentation(this.objects[id]);// Если для объекта было установлено свойство фрагментации, он порождает осколки. 
                 }
-
                 if(this.objects[id].playerIndex != undefined){                                                              // Только для пользовательских объектов (космолетов).
                     dashboard.update(this.objects[id].playerIndex, 'shipdamage', this.objects[id].paramsVariable.health);   // Для обновления параметра Healt космолетов.
                 }
@@ -411,6 +409,25 @@ const universe = {
         this.timeFlow = false;      // Остановка течения времени
         this.objects = [];          // Удаление объектов Вселенной
         this.winnerIndex = null;    // Обнуление индекса победителя
+    },
+
+
+
+      ////////////////////////////////////////////
+     /////// Обработчик состояния спрайтов //////
+    ////////////////////////////////////////////
+    spritesStateHandler(obj){
+        for (const spriteName in obj.activeSprites) {                                                   // Проход по всем счетчикам спрайтов, которые есть у объекта.
+            if(obj.activeSprites[spriteName] === false) continue;                                       // Если для спрайта установлено булево отрицание, а не число, т.е. счет кадров, операция изменения прерывается.
+            if(!(this.quantCounter % obj.paramsConst.sprites[spriteName].interval)){                    // Если итерация Вселенной кратна интервалу обработки спрайта, выполняется инкрементация счетчика кадров спрайта и визуализация кадра соответсвующего числу счетчика.
+                if(obj.activeSprites[spriteName] < obj.paramsConst.sprites[spriteName].frames){         // Если счетчик кадров не достиг максимального числа кадров спрайта, происходит его инкрементация, иначе сброс на первый кадр.
+                    obj.activeSprites[spriteName]++;
+                }else{
+                    obj.activeSprites[spriteName] = obj.paramsConst.sprites[spriteName].loop ? 1 : 100; // Если тип анимации спрайта зацикленный, происходит сброс на первый кадр, иначе устанавливается несуществующий кадр, который далее будет учтен в условии прорисовки метода playSprites.
+                }
+                obj.redraw = true;                                                                      // После изменений данных о спрайте (одном или нескольких из набора), объекту указывается флаг для перерисовки его рендером.
+            }
+        }
     }
 
 
@@ -450,7 +467,6 @@ const universe = {
     ✓ 21. Доработать метод столкновений так, чтобы при взаимном уничтожении объектов их траектория полета не менялась. Это нужно, чтобы создавался эффект пересечения взрывов, а не их отскока друг от друга.
 
 
-
 ========================================
 Баглист, задачи по доработке.
 ========================================
@@ -474,27 +490,14 @@ const universe = {
     ✓ 19. Когда космолет мигает после возрождения он может залететь за границы пространства. Это связано с тем, что ему пристваивается неактивный статус interaction (+условие в quantumSwitch).  
 20. Возникло странное поведение дашборда при уничтожении космолетов: появилось мерцание. Предположительно, баг возникший при обновлении браузера.
     ✓ 21. Нужно переделать метод колайдер, чтобы в кинетикрефлекшн передовались доп аргументы по условиям если health < 0 для объекта пары столкновения, то для него должна игнорироваться рефлексия.
-
-/* ВАРИАНТ РЕШЕНИЯ ЗАДАЧИ №21 ИЗ СПИСКА ЗАДАЧ. 
-    // Расчет кинетики пары
-    if(this.collidedPairsData[pairName].count == 0){                                        // Случай первичного соприкосновения пары.
-        library.physicalImpact(this.collidedPairsData[pairName].ids, universe.objects);     // Расчет остальных физических параметров пары.
-        if(universe.objects[this.collidedPairsData[pairName].ids[0]].paramsVariable.health > 0 && universe.objects[this.collidedPairsData[pairName].ids[1]].paramsVariable.health  > 0 ){
-            library.kineticReflexion(this.collidedPairsData[pairName].ids, universe.objects);   // Расчет кинетики пары после столкновения.
-        }
-    }else if(this.collidedPairsData[pairName].count == 2){                                  // Случай множественного (третьего по счету) соприкосновения пары.
-        library.physicalImpact(this.collidedPairsData[pairName].ids, universe.objects);
-        if(universe.objects[this.collidedPairsData[pairName].ids[0]].paramsVariable.health > 0 && universe.objects[this.collidedPairsData[pairName].ids[1]].paramsVariable.health  > 0 ){
-            library.nonGeomKineticReflexion(this.collidedPairsData[pairName].ids, universe.objects);
-        }
-    }
+    ✓ 22.  Нужно оптимизировать обработку спрайтов с интервалами, чтобы флаг redraw для объекотв не становился истинным тогда, когда спрайт не меняет кадр (естественно, рассматривается истуация, когда методы событий объекта нуждающиеся в перересовки не активны).
 
 
 
-
-
-
-
+========================================
+Пожелания к улучшению
+========================================
+1. Подумать, можно ли эффект искр сделать при рикошете объектов.
 
 
 Рекомендации по оптимизации

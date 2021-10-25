@@ -244,16 +244,7 @@ const library = {
     ///////////////////////////////
     playSprites: function(context, obj){
         for (const [spriteName, frameCount] of Object.entries(obj.activeSprites)) {
-            if(frameCount === false || !obj.paramsConst.sprites[spriteName]) continue;                  // Если для спрайта установлено булево отрицание, а не число, т.е. счет кадров, или если спрайт с указанным именем не существует у объекта, операция для пары прерывается.
-
-            if(!(universe.quantCounter % obj.paramsConst.sprites[spriteName].interval)){                // Если итерация Вселенной кратна интервалу обработки спрайта, выполняется инкрементация счетчика кадров спрайта и визуализация кадра соответсвующего числу счетчика.
-                if(obj.activeSprites[spriteName] < obj.paramsConst.sprites[spriteName].frames){         // Если счетчик кадров не достиг максимального числа кадров спрайта, происходит его инкрементация, иначе сброс на первый кадр.
-                    obj.activeSprites[spriteName]++;
-                }else{
-                    obj.activeSprites[spriteName] = obj.paramsConst.sprites[spriteName].loop ? 1 : 100; // Если тип анимации спрайта зацикленный, происходит сброс на первый кадр, иначе устанавливается несуществующий кадр, который далее будет учтен в условии прорисовки.
-                }
-            }
-
+            if(frameCount === false || !obj.paramsConst.sprites[spriteName]) continue;                  // Если для спрайта установлено булево отрицание, а не число, т.е. счет кадров, или если спрайт с указанным именем не существует у объекта, операция прорисовки прерывается.
             if(obj.activeSprites[spriteName] <= obj.paramsConst.sprites[spriteName].frames){            // Прорисовка кадров спрайтов, если счетчик кадров не превышает их кол-во. 
                 context.save();
                 context.translate(Math.ceil(obj.paramsVariable.fullFieldSize / 2), Math.ceil(obj.paramsVariable.fullFieldSize / 2));
@@ -360,7 +351,6 @@ const library = {
         });
         return pairs;
     },
-
 
 
 
@@ -622,19 +612,15 @@ const library = {
      ///// Метод негеометрического расчета ответных процедур на столкновения объектов . /////    * Выполняется в случае неестественного поведения при геометрической рефлексии (reflection) полигональных обектов.
     ////////////////////////////////////////////////////////////////////////////////////////
     nonGeomKineticReflexion: function(pair, uniObjs){
-
         if(uniObjs[pair[0]].paramsVariable.health <= 0 || uniObjs[pair[1]].paramsVariable.health <= 0) return; // Если один из объектов пары уничтожен, то, соответсвенно, и считать уже нечего.
-
         let m1 = uniObjs[pair[0]].paramsConst.weight,
             m2 = uniObjs[pair[1]].paramsConst.weight,
             v1 = uniObjs[pair[0]].paramsVariable.currentSpeed,
             v2 = uniObjs[pair[1]].paramsVariable.currentSpeed;
-
         uniObjs[pair[0]].paramsVariable.currentSpeed = [        // V₁ = (2m₂v₂ + v₁(m₁ - m₂)) / (m₁ + m₂);
             (2 * m2 * v2[0] + v1[0] * (m1 - m2)) / (m1 + m2),   // X
             (2 * m2 * v2[1] + v1[1] * (m1 - m2)) / (m1 + m2)    // Y
         ];
-
         uniObjs[pair[1]].paramsVariable.currentSpeed = [        // V₂ = (2m₁v₁ + v₂(m₂ - m₁)) / (m₁ + m₂).
             (2 * m1 * v1[0] + v2[0] * (m2 - m1)) / (m1 + m2),
             (2 * m1 * v1[1] + v2[1] * (m2 - m1)) / (m1 + m2)

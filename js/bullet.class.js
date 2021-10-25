@@ -122,8 +122,8 @@ class bullet {
      //////// Метод вращения объекта /////
     /////////////////////////////////////
     rotate(){
-        this.redraw = true;
         this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices); 
+        this.redraw = true;
     };
 
 
