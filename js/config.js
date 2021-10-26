@@ -22,10 +22,10 @@ const config = {
                 superWeapon: ['rocket', 0],                             // Супер оружие [модель оружия, % заряда].
                 reflection: false,                                      // Параметр указывает, меняется ли градус поворота объекта при рикошете от границ вселенной.
                 topSpeed: 5,                                            // Максимально возможная скорость, например, х100 метров в секунду.
-                rotationSpeed: 3,                                       // Скорость вращения (градусов в секунду). Значение должно делить 360 без остатка.
+                rotationSpeed: 3,                                       // Скорость вращения (градусов за квант). Значение должно быть кратно 360.
                 weight: 50,                                             // Масса объекта, например, в тоннах. Используется для физики динамических эффектов (энерция, столкновения и т.д.) и для расчета инкремента скорости в методах движения. 
-                durability: 10,                                          // Коэффициент прочности корабля от 1 до 10.
-                fragmentation: 0,                                       // Фрагменация на осколки при разрушении. Кол-во фрагментов равно от 0 до n. 0 - нет фрагментации. Свойство может отсутствовать.
+                durability: 1,                                          // Коэффициент прочности корабля от 1 до 10.
+                fragmentation: 3,                                       // Фрагменация на осколки при разрушении. Кол-во фрагментов равно от 0 до n. 0 - нет фрагментации. Свойство может отсутствовать.
                 texture: {},                                            // Параметры тектуры для объекта. Присваиваются из конфига при инициализации объекта соответсвенно имени объекта. Свойство необязательное и если оно отсутствует, текстура не присваивается.
                 sprites: {},                                            // Спрайты для объекта. Присваиваются из конфига спрайтов при инициализации объекта соответсвенно имени объекта. Если свойство отсутствует, спрайты не присваивается и не обрабатываются.
                 effects: {                                              // Набор эффектов состоящие из пар: тип эффекта / коллекция идентификационных имен эффектов, которые будут выбираться случайно, если их больше чем один. Свойство может быть пустым, но не может отсутсвтовать!
@@ -92,7 +92,7 @@ const config = {
                 formType: 'circle',                                     // Тип фигуры объекта. В зависимости от типа (polygon/circle) применяются разные функции расчета физики и отрисовки при рендеринге.
                 reflection: true,                                       // Параметр указывает, меняется ли градус поворота объекта при рикошете от границ вселенной.
                 speed: [10, false],                                     // Собственная скорость пули. Второй параметр указывает статичная скорость (false) или вариативная/случайная от 0 до n (true).
-                rotationSpeed: 0,                                       // Максимальная скорость вращения в пределах значения которой (от 0 до n) будет случайно выбран параметр вращения при инициализации обекта.
+                rotationSpeed: 0,                                       // Максимальная скорость вращения от 0 до n в пределах значения которой (от -n до n) будет случайно выбран параметр вращения при инициализации обекта. Значение должно быть кратно 360.
                 weight: 1,                                              // Масса объекта, например, в тоннах. Используется для физики динамических эффектов (энерция, столкновения и т.д.) и для расчета инкремента скорости в методах движения. 
                 durability: 1,                                          // Коэффициент прочности.
                 chargeTime: 60,                                         // Время восполнения заряда в квантах (кол-во итераций 60 ~ 1сек)
@@ -149,7 +149,7 @@ const config = {
             paramsConst: {                                              // Комплект свойств, которые не меняются во время жизни космолета, но могут быть изменены в процессе его инициализации (создания).
                 formType: 'circle',                                     // Тип фигуры объекта. В зависимости от типа (polygon/circle) применяются разные функции расчета физики и отрисовки при рендеринге.
                 topSpeed: 5,                                            // Максимально возможная скорость, например, х100 метров в секунду.
-                rotationSpeed: 3,                                       // Скорость вращения (градусов в секунду). Значение должно делить 360 без остатка.
+                rotationSpeed: 0,                                       // Максимальная скорость вращения от 0 до n в пределах значения которой (от -n до n) будет случайно выбран параметр вращения при инициализации обекта. Значение должно быть кратно 360.
                 weight: 50,                                             // Масса объекта, например, в тоннах. Используется для физики динамических эффектов (энерция, столкновения и т.д.) и для расчета инкремента скорости в методах движения. 
                 durability: 1,                                          // Коэффициент прочности корабля от 1 до 10.
                 fragmentation: 3,                                       // Фрагменация на осколки при разрушении. Кол-во фрагментов равно от 0 до n. 0 - нет фрагментации. Свойство может отсутствовать.
@@ -168,7 +168,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 50,
                 durability: 1,
                 fragmentation: 5,
@@ -187,7 +187,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 15,
                 durability: 1,
                 fragmentation: 2,
@@ -206,7 +206,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 100,
                 durability: 5,
                 fragmentation: false,
@@ -225,7 +225,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 5,
                 durability: 2,
                 fragmentation: false,
@@ -243,7 +243,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 5,
                 durability: 2,
                 fragmentation: false,
@@ -261,7 +261,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 5,
                 durability: 2,
                 fragmentation: false,
@@ -279,7 +279,7 @@ const config = {
             paramsConst: {
                 formType: 'circle',
                 topSpeed: 5,
-                rotationSpeed: 3,
+                rotationSpeed: 0,
                 weight: 15,
                 durability: 1,
                 fragmentation: false,
@@ -292,28 +292,124 @@ const config = {
             }
         },
 
-        fragment : {
-            model: 'fragment',
+        fragmentV1 : {
+            model: 'fragmentV1',
+            paramsConst: {
+                formType: 'circle',
+                topSpeed: 5,
+                rotationSpeed: 5,
+                weight: 1,
+                durability: 1,
+                fragmentation: false,
+                texture: {},
+                //sprites: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 8,
+                vertices: [], 
+            }
+        },
+
+        fragmentV2 : {
+            model: 'fragmentV2',
+            paramsConst: {
+                formType: 'circle',
+                topSpeed: 5,
+                rotationSpeed: 5,
+                weight: 1,
+                durability: 1,
+                fragmentation: false,
+                texture: {},
+                //sprites: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 9,
+                vertices: [], 
+            }
+        },
+
+        fragmentV3 : {
+            model: 'fragmentV3',
+            paramsConst: {
+                formType: 'circle',
+                topSpeed: 5,
+                rotationSpeed: 5,
+                weight: 1,
+                durability: 1,
+                fragmentation: false,
+                texture: {},
+                //sprites: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 8,
+                vertices: [], 
+            }
+        },
+
+        fragmentV4 : {
+            model: 'fragmentV4',
+            paramsConst: {
+                formType: 'circle',
+                topSpeed: 5,
+                rotationSpeed: 5,
+                weight: 1,
+                durability: 1,
+                fragmentation: false,
+                texture: {},
+                //sprites: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 6,
+                vertices: [], 
+            }
+        },
+
+        fragmentV5 : {
+            model: 'fragmentV5',
+            paramsConst: {
+                formType: 'circle',
+                topSpeed: 5,
+                rotationSpeed: 5,
+                weight: 1,
+                durability: 1,
+                fragmentation: false,
+                texture: {},
+                //sprites: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 6,
+                vertices: [], 
+            }
+        },
+
+        fragmentV6 : {
+            model: 'fragmentV6',
             paramsConst: {
                 formType: 'polygon',
                 topSpeed: 5,
-                rotationSpeed: 3,
-                weight: 20,
+                rotationSpeed: 5,
+                weight: 1,
                 durability: 1,
                 fragmentation: false,
-                //texture: {},
-                sprites: {},
+                texture: {},
+                //sprites: {},
                 effects: {
-                    //explosions: ['dustCollision'],
+                    explosions: ['miniBangV1', 'miniBangV2'],
                 },
                 radius: 0,
                 vertices: [
-                    [0, -41],
-                    [30, 42],
-                    [-30, 15] 
+                    [-5, -15],
+                    [5, -15],
+                    [5, 15],
+                    [-5, 15],
                 ], 
             }
-        }
+        },
     },
 
 
@@ -450,7 +546,7 @@ const config = {
             },
             players: 2,                                                     // Количество игроков. Установлено значение по умолчанию.
             ships: 2,                                                       // Кораблей в партии. Установлено значение по умолчанию. Регулируется из лобби.
-            celestialBodies: [2, 2],                                        // Количество небесных тел при старте геймплея [min, max].
+            celestialBodies: [1, 2],                                        // Количество небесных тел при старте геймплея [min, max].
             pauseKey: 'Escape',                                             // Код клавиши паузы геймплея.
         },
         players: [                                                      // Настройки игроков. Количество элементов массива определяет максимальное кол-во игроков.
@@ -564,8 +660,56 @@ const config = {
                 img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAARBAMAAADqGAscAAAAJFBMVEX/AKYAAAD/AKL/AKWAlf90i/9qg/9ifP9bdv/M1P+yv/+Zqv8TN9GXAAAACXRSTlNJADcS/uC2hUYbbLO8AAAAMElEQVQI12OQEGAQF2AQE2AwNWBQUWDgZmDgYmDghCAQGyTCwsCgqsBgZgBUCVQPAD19AmJPXqskAAAAAElFTkSuQmCC';
                 return img;
             }(),
-            size: [3, 17]      // Реальные размеры изображения (нужны для корректного отображения и позиционирования). Желательно, чтобы размеры реальных изображений были нечетными для более точного позиционирования.
+            size: [3, 17]
         },
+        fragmentV1: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'images/fragment_v1.png';
+                return img;
+            }(),
+            size: [24, 16]
+        },
+        fragmentV2: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'images/fragment_v2.png';
+                return img;
+            }(),
+            size: [32, 17]
+        },
+        fragmentV3: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'images/fragment_v3.png';
+                return img;
+            }(),
+            size: [15, 24]
+        },
+        fragmentV4: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'images/fragment_v4.png';
+                return img;
+            }(),
+            size: [24, 12]
+        },
+        fragmentV5: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'images/fragment_v5.png';
+                return img;
+            }(),
+            size: [16, 16]
+        },
+        fragmentV6: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'images/fragment_v6.png';
+                return img;
+            }(),
+            size: [11, 33]
+        }
     },
 
 

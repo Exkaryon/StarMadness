@@ -160,8 +160,8 @@ const library = {
      ///// Функция пересчета координат вершин в зависимости от угла поворота объекта /////
     /////////////////////////////////////////////////////////////////////////////////////
     calcRotationVertices: function(fulcrum, deg, vertices){
-        if(!vertices) return false;
         let newVtxs = [];
+        if(!vertices) return newVtxs;
         vertices.forEach((vertex) => {
             newVtxs.push([
                 Math.trunc((vertex[0] - fulcrum[0]) * Math.cos(deg * Math.PI / 180) - (vertex[1] - fulcrum[1]) * Math.sin(deg * Math.PI / 180)),    // X

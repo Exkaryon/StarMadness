@@ -122,8 +122,21 @@ class bullet {
      //////// Метод вращения объекта /////
     /////////////////////////////////////
     rotate(){
-        this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices); 
-        this.redraw = true;
+        this.paramsVariable.deg += this.paramsConst.rotationSpeed;
+        if(this.paramsVariable.deg >= 360){
+            this.paramsVariable.deg = this.paramsVariable.deg - 360;
+        }else if(this.paramsVariable.deg < 0){
+            this.paramsVariable.deg = this.paramsVariable.deg + 360;
+        } 
+
+        // Изменение координат вершин объекта, по которым выполняются расчеты физики и рендеринг, когда объект полигональный.
+        if(this.paramsConst.formType == 'polygon'){
+            this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices); 
+            this.redraw = true;
+        }
+
+        // Объекту всегда требуется указание флага перерисовки при повороте в случае, если для него указана текстура.
+        if(this.paramsConst.texture) this.redraw = true;
     };
 
 

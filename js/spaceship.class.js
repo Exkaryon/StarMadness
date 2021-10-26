@@ -76,6 +76,8 @@ class spaceShip {
         this.paramsVariable.fullFieldSize = library.getFullFieldSize(this);                                                 // Размер области, которую будет занимать объект, включая все его графические элементы.
         this.paramsVariable.location = library.respawnPos(this, universe.objects);                                          // Стартовая позиция в пространстве.
         this.paramsVariable.currentSpeed = library.respawnSpeed(this);                                                      // Стартовая скорость при рождении/возраждении.
+        this.paramsVariable.deg = library.randomizer(0, 360);                                                               // Стартовый случайный угол при рождении/возраждении.
+        if(this.paramsConst.formType == 'polygon') this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices); // Пересчет вершин под стартотвый угол, когда объект полигональный.
         this.blink();                                                                                                       // Запуск индикации возраждения (мерцания).
         this.driver(this.driverType);                                                                                       // Инициализация управления.
         this.activeActions.motion = true;                                                                                   // Запуск дрейфа в пространстве
@@ -140,10 +142,10 @@ class spaceShip {
                 }else{                                                                                      // Если же скорость по оси превзошла лимит, выполняется расчет декримента для направления (оси), у которого превышена скорость. Это нужно для того, чтобы объект постепенно выравнивал направление движения соответсвенно повороту, а не улетал в стороны, сохраняя "боковую" скорость.
                     let raznost, coef, decr;
                     raznost = Math.abs(limit) - Math.abs(curSpeed[key]);                                    // Декримент пропорционален разности лимита по направлению и реальной скорости по направлению.
-                    coef    = maxSpeed * Math.sign(curSpeed[key]) - limit,                                  // Разница между общей разрешенной сокростью и разрешенной скоростью направления (по оси). Является дополнительным коэфициентом расчета.
-                    decr   = coef ? raznost / coef * -1 : 0;                                                // Декремент явлется отношением разностей. 
+                    coef    = maxSpeed * Math.sign(curSpeed[key]) - limit;                                  // Разница между общей разрешенной сокростью и разрешенной скоростью направления (по оси). Является дополнительным коэфициентом расчета.
+                    decr    = coef ? raznost / coef * -1 : 0;                                               // Декремент явлется отношением разностей. 
                     curSpeed[key] -= decr / this.paramsConst.weight;
-                    if(decr < 0.1) curSpeed[key] -= Math.sign(curSpeed[key]) / this.paramsConst.weight;     // Если декремент пренибрежимо мал или =0 (при некоторых обстоятельствах) скорость не сможет быстро вернуться из ЗАпределов лимита, поэтому ее нужно принудительно вернуть в эти пределы увеличив декремент, чтобы первое услови с инкрементом снова могло сработать.
+                    if(decr < 0.1) curSpeed[key] -= Math.sign(curSpeed[key]) / this.paramsConst.weight;     // Если декремент пренебрежимо мал или =0 (при некоторых обстоятельствах) скорость не сможет быстро вернуться из запределов лимита, поэтому ее нужно принудительно вернуть в эти пределы увеличив декремент, чтобы первое услови с инкрементом снова могло сработать.
                 }
             });
             this.activeActions.impulse = true;                                                              // Флаг, указывающий объекту Вселенной необходимость обработки данного метода.
@@ -175,7 +177,9 @@ class spaceShip {
                 this.activeSprites.rotatorRight = this.activeSprites.rotatorLeft !== false ? 0 : this.activeSprites.rotatorRight || 0;
                 this.activeSprites.rotatorLeft = false;
             }
-            this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices);       // Изменение координат вершин объекта, по которым выполняются расчеты физики и рендеринг.
+            if(this.paramsConst.formType == 'polygon'){
+                this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices);       // Изменение координат вершин объекта, по которым выполняются расчеты физики и рендеринг.
+            }
             this.activeActions.rotate = true;                                                                                           // Флаг, указывающий объекту Вселенной необходимость обработки метода.
         }else{
             if(!this.paramsConst.sprites) {

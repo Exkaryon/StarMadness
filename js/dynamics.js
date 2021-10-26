@@ -77,7 +77,8 @@ const universe = {
         this.quantumSwitch();
 
         // Инициализация метода паузы геймплея.
-        document.addEventListener('keyup', this.pause);
+        this.dPause = this.pause.bind(this);            // Декоратор для паузы для привязки контекста к функции.
+        document.addEventListener('keyup', this.dPause);
     },
 
 
@@ -86,58 +87,57 @@ const universe = {
      /////// Кванты времени. Течение времени для всего, ведь время во Вселенной едино! ////         (!) Через данный метод проходят все параметры объектов, которые могут изменяться со временем (координаты, градусы поворота, скорость и т.д.).
     //////////////////////////////////////////////////////////////////////////////////////
     quantumSwitch(){
-        
-        if (universe.timeFlow) {
+        if (this.timeFlow) {
             let t = performance.now();
 
             // Выполнение методов каждого из объектов Вселенной, у которых указан флаг выполнения (activeActions).
-            universe.objects.forEach((obj, key) => {
+            this.objects.forEach((obj, key) => {
                 if(obj.exist){                                  // Если объект актуален, выполняются его активные методы.
                     for(let method in obj.activeActions){
                         if(obj.activeActions[method]) obj[method]();
                     }
 
                     library.boundaryLaw(obj, config.gameSettings.gameplay.boundaryBehavior);    // Процедура взаимодействия объекта с границей игрового пространства (экрана).
-                    universe.spritesStateHandler(obj);                                          // Процедура отслеживания и изменения состояния спрайтов объектов.
+                    this.spritesStateHandler(obj);                                          // Процедура отслеживания и изменения состояния спрайтов объектов.
 
                 }else{                                          // В противном случае, слушатели событий объекта, объект и его слой удаляются, запускается процесс возраждения.
-                    if(universe.objects[key].playerIndex != undefined){                                                           // Операции только для объектов игроков (космолетов).
-                        document.removeEventListener('keydown', universe.objects[key]['playerKeydownListener'+universe.objects[key].playerIndex]);
-                        document.removeEventListener('keyup', universe.objects[key]['playerKeydownListener'+universe.objects[key].playerIndex]);
-                        config.gameSettings.players[universe.objects[key].playerIndex].shipMods.shift();
-                        dashboard.update(universe.objects[key].playerIndex, 'shipdestroy');                                       // Обновление данных пользователя (для декримента коллекции космолетов)
-                        universe.gameplayRelevanceCheck(universe.objects[key].playerIndex);
+                    if(this.objects[key].playerIndex != undefined){                                                           // Операции только для объектов игроков (космолетов).
+                        document.removeEventListener('keydown', this.objects[key]['playerKeydownListener'+this.objects[key].playerIndex]);
+                        document.removeEventListener('keyup', this.objects[key]['playerKeydownListener'+this.objects[key].playerIndex]);
+                        config.gameSettings.players[this.objects[key].playerIndex].shipMods.shift();
+                        dashboard.update(this.objects[key].playerIndex, 'shipdestroy');                                       // Обновление данных пользователя (для декримента коллекции космолетов)
+                        this.gameplayRelevanceCheck(this.objects[key].playerIndex);
                     }
-                    delete universe.objects[key];
+                    delete this.objects[key];
                     delete render.layers[key];
                     console.log('Йок!');
                 }
             });
 
             // Обработка установленных таймеров.
-            universe.quantumTimer();
+            this.quantumTimer();
             // Детектирование столкновений объектов.
-            universe.collider();
+            this.collider();
             // Визуализация обновленных параметров всех объектов Вселенной за текущий квант.
             render.rendering();
 
-            universe.quantCounter++;
+            this.quantCounter++;
             
-            universe.counter++;
-            if(universe.counter < 1800){
+            this.counter++;
+            if(this.counter < 1800){
                 // Переход к следующему кванту (итерации обработки параметров).
-                requestAnimationFrame(universe.quantumSwitch);
+                requestAnimationFrame(this.quantumSwitch.bind(this));
             }else{
-                universe.timeFlow = false;
+                this.timeFlow = false;
             }
 
 
             // ОТЛАДКА: Количество объектов во Вселенной.
-            universe.objcount = (Object.keys(universe.objects).length < universe.objcount ) ? universe.objcount : Object.keys(universe.objects).length;
+            this.objcount = (Object.keys(this.objects).length < this.objcount ) ? this.objcount : Object.keys(this.objects).length;
 
             // ОТЛАДКА: Производительность.
             let q = performance.now() - t;
-            universe.perf = (q < universe.perf ) ? universe.perf : q;
+            this.perf = (q < this.perf ) ? this.perf : q;
             //DEBUG_INFO('win_2', [universe.perf.toFixed(0), universe.objcount], 'green');
 
             // ОТЛАДКА: Список объектов Вселенной.
@@ -171,7 +171,7 @@ const universe = {
             DEBUG_INFO('win_1', function (){
                     let r = [];
                     universe.objects.forEach(element => {
-                        r.push(element.paramsVariable.currentSpeed);
+                        r.push(element.paramsVariable.currentSpeed[0].toFixed(2)+ ' | '+element.paramsVariable.currentSpeed[1].toFixed(2));
                     });                                   
                     return r;
                 }(), 'orange');
@@ -186,13 +186,13 @@ const universe = {
     ////////////////////////////////////////////////////////////////////////
     pause(e){
         if(e.code == config.gameSettings.gameplay.pauseKey){
-            if(universe.timeFlow){
-                universe.timeFlow = false;
+            if(this.timeFlow){
+                this.timeFlow = false;
                 dashboard.showPauseBox(true);
             }else{
                 dashboard.showPauseBox(false);
-                universe.timeFlow = true;
-                universe.quantumSwitch();
+                this.timeFlow = true;
+                this.quantumSwitch();
             }
         }
     },
@@ -243,18 +243,19 @@ const universe = {
 
             // Проверка объектов пары на жизнеспособность после столкновения.
             CP.ids.forEach((id, key) => {
-                if(this.objects[id].paramsVariable.health <= 0){                                    // Если объект уничтожен, он помечается как неактуaльный и...
+                if(this.objects[id].paramsVariable.health <= 0){                                        // Если объект уничтожен, он помечается как неактуaльный и...
+                    if(this.objects[id].paramsConst.fragmentation) this.fragmentation(this.objects[id]);    // Если для объекта было установлено свойство фрагментации, он порождает осколки (это вынесено раньше создания эффекта взрыва, чтобы зффект прикрыл внезапное появления фрагментов). 
+
                     this.objects[id].exist = false;
-                    if(this.objects[id].paramsConst.effects.explosions){                            // ...если у объекта есть эффект взрыва, во Вселенную добавляется новый объект данного эффекта.
+                    if(this.objects[id].paramsConst.effects.explosions){                                    // ...если у объекта есть эффект взрыва, во Вселенную добавляется новый объект данного эффекта.
                         this.objects.push(
                                 new effect(
-                                    this.objects[id],                                                   // Объект-источник эффекта (разрушенный в данном случае) 
-                                    this.objects[CP.ids[key ? 0 : 1]],                                  // Объект, учавствующий во взаимодействии с объектом-источником. Передается как носитель параметров, для возможного наследия их эффектом.
-                                    'explosions'                                                        // Тип эффекта прописанный для объекта в его конфиге.
+                                    this.objects[id],                                                       // Объект-источник эффекта (разрушенный в данном случае) 
+                                    this.objects[CP.ids[key ? 0 : 1]],                                      // Объект, учавствующий во взаимодействии с объектом-источником. Передается как носитель параметров, для возможного наследия их эффектом.
+                                    'explosions'                                                            // Тип эффекта прописанный для объекта в его конфиге.
                                 )
                             );
                     }
-                    if(this.objects[id].paramsConst.fragmentation) this.fragmentation(this.objects[id]);// Если для объекта было установлено свойство фрагментации, он порождает осколки. 
                 }
                 if(this.objects[id].playerIndex != undefined){                                                              // Только для пользовательских объектов (космолетов).
                     dashboard.update(this.objects[id].playerIndex, 'shipdamage', this.objects[id].paramsVariable.health);   // Для обновления параметра Healt космолетов.
@@ -399,13 +400,12 @@ const universe = {
     ////////////////////////////////
     destroy(){
         this.objects.forEach((obj, key) => {        // Удаление слушателей событий управляемых объектов.
-            if(universe.objects[key].playerIndex != undefined){
+            if(this.objects[key].playerIndex != undefined){
                 document.removeEventListener('keydown', this.objects[key]['playerKeydownListener'+this.objects[key].playerIndex]);
                 document.removeEventListener('keyup', this.objects[key]['playerKeyupListener'+this.objects[key].playerIndex]);
             }
         });
-
-        document.removeEventListener('keyup', this.pause);  // Удаление слушателя для метода паузы геймплея.
+        document.removeEventListener('keyup', this.dPause);  // Удаление слушателя для метода паузы геймплея.
         this.timeFlow = false;      // Остановка течения времени
         this.objects = [];          // Удаление объектов Вселенной
         this.winnerIndex = null;    // Обнуление индекса победителя
@@ -460,7 +460,7 @@ const universe = {
     ✓ 14. Сделать индикацию возрождения для космолетов игроков.
     ✓ 15. Сделать корректное завершение геймплея и переход в меню.
     ✓ 16. Сделать возможность паузы геймплея и перехода в меню, когда геймплей еще актуален.
-17. Добавить космический мусор (астероиды и другие объекты) и определить их жизненный цикл в игровой вселенной.
+    ✓ 17. Добавить космический мусор (астероиды и другие объекты) и определить их жизненный цикл в игровой вселенной.
     ✓ 18. Визуализировать работу двигателей для космолетов.
     ✓ 19. Визуализировать взрывы объектов.
 20. Создать методы для добавления звукового сопровождения событий во Вселенной. Начать со звуков стрельбы и взрывов.
@@ -485,13 +485,13 @@ const universe = {
     ✓ 14. Не предусмотрена ситуация нечьей. В случае взаимного уничтожения получается ошибка в дашборде в showWinner. 
     ✓ 15. Не сливается последний проигравший плеер в дашборде, а сразу выводится надпись победителя.
     ✓ 16. Пару раз возникала ситуация, когда при старте геймплея или во время геймплея активировалось и "залипало" ускорение космолета игрока без нажатия клавиш. Возможно это связано с прерыванием игры через паузу. Нужно прочекать. (На самом деле это было связано с флагами контроля действия, которые не копируются из конфига, а ссылаются на него.)
-17. Космолеты и другие объекты Вселенной всегда появляются направленными в одну сторону (наверх). Нужно сделать рандомное направление или направление соответсвующее движению объектов (в особенности космолетов).
+    ✓ 17. Космолеты и другие объекты Вселенной всегда появляются направленными в одну сторону (наверх). Нужно сделать рандомное направление или направление соответсвующее движению объектов (в особенности космолетов).
     ✓ 18. Необходимо разделить для космолетов метод motion на два метода impulse и motion поскольку это создает сложности при реализации визуализации спрайтов работы двигателей. Да и логически это совершенно разные методы.
     ✓ 19. Когда космолет мигает после возрождения он может залететь за границы пространства. Это связано с тем, что ему пристваивается неактивный статус interaction (+условие в quantumSwitch).  
 20. Возникло странное поведение дашборда при уничтожении космолетов: появилось мерцание. Предположительно, баг возникший при обновлении браузера.
     ✓ 21. Нужно переделать метод колайдер, чтобы в кинетикрефлекшн передовались доп аргументы по условиям если health < 0 для объекта пары столкновения, то для него должна игнорироваться рефлексия.
-    ✓ 22.  Нужно оптимизировать обработку спрайтов с интервалами, чтобы флаг redraw для объекотв не становился истинным тогда, когда спрайт не меняет кадр (естественно, рассматривается истуация, когда методы событий объекта нуждающиеся в перересовки не активны).
-
+    ✓ 22. Нужно оптимизировать обработку спрайтов с интервалами, чтобы флаг redraw для объекотв не становился истинным тогда, когда спрайт не меняет кадр (естественно, рассматривается истуация, когда методы событий объекта нуждающиеся в перересовки не активны).
+23. Желательно доработать метод появления фрагментов и камней так, чтобы при уничтожении объекта не появлялись одинаковые объекта, а по возможности создавались разные.
 
 
 ========================================

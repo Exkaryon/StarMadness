@@ -34,7 +34,7 @@ class celestialBody {
         const bodyTypes = {                                                                                                         // Набор типов небесных тел и их коллекции моделей.
             asteroids: ['asteroidStone', 'asteroidBrown', 'asteroidSteel', 'asteroidBlack'],
             stones: ['stoneV1', 'stoneV2', 'stoneV3', 'stoneV4'],
-            debris: ['fragment'],
+            debris: ['fragmentV1', 'fragmentV2', 'fragmentV3', 'fragmentV4', 'fragmentV5', 'fragmentV6'],
         };
         Object.assign(this, config.celestialBodyMods[bodyTypes[bodyType][library.randomizer(1, bodyTypes[bodyType].length) - 1]]);  // Копирование статичных свойств из конфига соответсвенно случайно выбранному моду из набора.
 
@@ -43,11 +43,8 @@ class celestialBody {
             this.paramsVariable.location = [parentParams.location[0], parentParams.location[1]];
             this.activeActions.ignoringPI = true;
         }else{
-            this.paramsVariable.location = library.respawnPos(this, universe.objects);                                          // Стартовая позиция в пространстве.
-
+            this.paramsVariable.location = library.respawnPos(this, universe.objects);                                              // Стартовая позиция в пространстве.
         }
-
-
         this.init();
     }
 
@@ -81,6 +78,10 @@ class celestialBody {
         this.paramsVariable.fullFieldSize = library.getFullFieldSize(this);                                                 // Размер области, которую будет занимать объект, включая все его графические элементы.
         this.paramsVariable.currentSpeed = library.respawnSpeed(this);                                                      // Стартовая скорость при рождении/возраждении.
         this.activeActions.motion = true;
+
+        this.paramsVariable.deg = library.randomizer(0, 360);                                                               // Стартовый угол поворота объекта.
+        this.paramsVariable.rotationSpeed = library.randomizer(-this.paramsConst.rotationSpeed, this.paramsConst.rotationSpeed); // Случайная скорость вращения объекта в пределах установленных значений, записывается в paramsVariable поскольку является переменным значением.
+        this.activeActions.rotate = this.paramsVariable.rotationSpeed ? true : false;                                          // Если скорость вращения отлична от нуля, тогда активируется метод вращения. 
     }
 
 
@@ -95,6 +96,29 @@ class celestialBody {
 
 
 
+      ////////////////////////////////////////////////////
+     /////// Метод вращения объекта (ориентации). ///////
+    ////////////////////////////////////////////////////
+    rotate(){
+        this.paramsVariable.deg += this.paramsVariable.rotationSpeed;
+        if(this.paramsVariable.deg >= 360){
+            this.paramsVariable.deg = this.paramsVariable.deg - 360;
+        }else if(this.paramsVariable.deg < 0){
+            this.paramsVariable.deg = this.paramsVariable.deg + 360;
+        } 
+
+        // Изменение координат вершин объекта, по которым выполняются расчеты физики и рендеринг, когда объект полигональный.
+        if(this.paramsConst.formType == 'polygon'){
+            this.paramsVariable.vertices = library.calcRotationVertices(this.paramsVariable.fulcrum, this.paramsVariable.deg, this.paramsConst.vertices);
+            this.redraw = true; // Если фигура объекта должна отрисоваться в рендере, то потребуется указание флага при поворотах, в противном случае можно присвоение флага убрать отсюда.
+        }
+
+        // Объекту всегда требуется указание флага перерисовки при повороте в случае, если для него указана текстура. В случае спрайта, поворот объекта перересуется соответсвенну интервалу смены кадра (это рационально с точки зрения экономии ресурсов).
+        if(this.paramsConst.texture) this.redraw = true;
+    }
+
+
+
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
      /////// Метод игнорирования физического воздействия относительно определенных моделей объектов Вселенной. //////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +126,8 @@ class celestialBody {
         if(!this.activeActions.ignoringPI) return;
         if(!this.ignorePITimer){                                                    // Если таймер индикации не установлен, устанавливается он и флаг индикации. 
             this.ignorePITimer = 180;                                               // Время игнорирования физического воздействия в квантах. Пример: пока небесные тела не успели разлететься подальше друг от друга (осколки после разбития большого астероидла), нужно отключать физическое воздействие, чтобы они не уничтожились друг об друга.
-            this.ignoreModels = ['stoneV1', 'stoneV2', 'stoneV3', 'stoneV4'];       // Модели объектов, которые следует игнорировать, то есть в данном случае, созданный камень игнорирует объекты перечисленных моделей.
+            this.ignoreModels = ['stoneV1', 'stoneV2', 'stoneV3', 'stoneV4', 'fragmentV1', 'fragmentV2', 'fragmentV3', 'fragmentV4', 'fragmentV5', 'fragmentV6'];       // Модели объектов, которые следует игнорировать, то есть в данном случае, созданный камень игнорирует объекты перечисленных моделей.
+
         }else{
             this.ignorePITimer--;
             if(this.ignorePITimer <= 0){
