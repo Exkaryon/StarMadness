@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom:0;
+        }
+        .progress {
+            width: 320px;
+            color: #0907;
+            font: 13px Verdana;
+        }
+
+        .progress .percents {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .progress .bar {
+            width: 100%;
+            border:solid 1px #0907;
+        }
+        .progress .bar div {
+            height: 10px;
+            width: 0;
+            background: #0907;
+        }
+        .progress .message {
+            letter-spacing: 0.05em;
+            margin-top:5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .progress.error {
+            color: #f007;
+        }
+        .progress.error .message {
+            border-color: #f007;
+        }
+        .progress.error .bar {
+            border-color:#f007;
+        }
+        .progress.error .bar div {
+            background: #f007;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="progress">
+        <div class="percents">0%</div>
+        <div class="bar"><div>&nbsp;</div></div>
+        <div class="message"></div>
+    </div>
+
+
+
+    <script>
+    let soundLibrary = {
+        epicArrival:    'http://127.0.0.5:85/audio/epic-arrival.mp3',
+        tomorrowIsToday:'http://127.0.0.5:85/audio/tomorrow-is-today.mp3',
+        alienInvasion:  'http://127.0.0.5:85/audio/alien-invasion.mp3',
+    }; 
+
+
+    let context = new (window.AudioContext || window.webkitAudioContext)();     // Аудио контекст.
+    let sounds = new Map();                                                     // Коллекция готовых звуков.
+
+
+
+
+// Отстановились на буферизации. Нужно написать такой сценарий:
+//    1. Пересчитать количество треков. Создать на его основе прогрессбар.
+//    2. Поочередно загрузить все треки, а их буфер пропустить через new Sound, получившиеся объекты писать в коллецию sounds, а квантификатор прелоадера изменять соответственно каждому удачно згаруженному буферу.
+//    3. Нужно также посмотреть, стоит ли загружать все треки, или лучше загружать короткие эффекты, а музыку создавать уже непосредственно по запросу. Короче, тут много вопросов, когда и как грузить треки и звуковые семплы. Вот например в меню музыку можно выборочно грузить.
+//    4. Тут как напоминалку просто помещу, что видос грузить наверное тоже лучше через промис, а то будет рассинхрон с музыкой, когда музыка уже заиграла в меню, а видос все еще грузиться.
+//            sounds.set(soundName, this);                            // Записываем получившийся звук в коллекцию звуков.
+
+      /////////////////////////////////////////////
+     /////  Класс для создания объекта звука /////
+    ///////////////////////////////////////////// 
+    class Sound {
+        
+        // Создаем объект звука на основе полученных данных.
+        constructor(context, buffer) {
+            this.context = context;         // Аудио контекст документа.
+            this.buffer = buffer;           // Передача буфера загруженного файла.
+        }
+
+        // Инициализация звука - процедура создания узлов управления и установка параметров для проигрывания.
+        init() {
+            // Обязательные процедуры:
+            this.gainNode = this.context.createGain();              // Создание узла усиления.
+            this.source = this.context.createBufferSource();        // Создание нового AudioBufferSourceNode, который может быть использован для воспроизведения звуковых данных. 
+            this.source.buffer = this.buffer;                       // Установка в качестве источника звука (аудиобуфера) передаем буфер из полученного файла (this.buffer).
+            this.source.connect(this.gainNode);                     // Цепляем к источнику звука к узел усиления, чтобы можно было регулировать громкость.
+            this.gainNode.connect(this.context.destination);        // Цепляем gainNode к destination. (i) destination — Свойство BaseAudioContext интерфейса возвращает AudioDestinationNode представляющий конечный пункт назначения всех аудио в контексте. Он часто представляет собой реальное устройство воспроизведения звука, такое как динамики вашего устройства.
+
+            // Дополнительные процедуры изменяющие умолчания:
+            this.gainNode.gain.setValueAtTime(0.8, this.context.currentTime);  // Изменение громкости в текущий момент времени.
+        }
+
+        play() {
+            this.init();
+            this.source.start(this.context.currentTime);
+        }
+
+        stop() {
+            let ct = this.context.currentTime + 3.0;
+            this.gainNode.gain.setValueAtTime(1.0, this.context.currentTime);
+            this.gainNode.gain.exponentialRampToValueAtTime(0.01, ct);
+            this.source.stop(ct);
+        }
+    }
+
+
+
+
+
+    const soundsPreloader = {
+        soundFiles: {},                                                     // Коллекция файлов для загрузки
+        totalFiles: 0,                                                      // Общее число файлов
+        loadedFiles: 0,                                                     // Число загруженных файлов.
+        progress: {                                                         // Прогрессбар
+            parent: document.querySelector('.progress'),
+            percent: document.querySelector('.progress .percents'),
+            bar: document.querySelector('.progress .bar'),
+            message: document.querySelector('.progress .message'),
+        },
+
+
+
+        init(){
+            this.soundFiles = soundLibrary;
+            this.totalFiles = Object.entries(soundLibrary).length;
+            this.loader(function(sFs){
+                    let sNC = [];
+                    for (const soundName in sFs) {
+                        sNC.push(soundName);
+                    }
+                    return sNC;
+                }(this.soundFiles));
+        },
+
+
+        update(url, error){
+            if(url){
+                let fileNames = url.split('/');
+                let fileName = fileNames[fileNames.length-1];
+                if(error){
+                    this.progress.message.textContent = `Что-то пошло не так с файлом: ${fileName} !`;
+                    this.progress.parent.classList.add('error');
+                    return;
+                }else{
+                    this.progress.message.textContent = `Буферизация: .../${fileName}`;
+                }
+            }
+            const percent = this.loadedFiles /  this.totalFiles * 100;
+            this.progress.percent.textContent = Math.round(percent) + '%';
+            this.progress.bar.children[0].style.width = Math.round(percent) + '%';
+        },
+
+
+        async loader(soundNames){
+            if(!soundNames.length){
+                console.log('Все файлы загружены, предоставляем кнопку запуска меню приложения.');
+                // Start Intro
+                return;
+            }
+            const soundName = soundNames.shift();
+            const url = this.soundFiles[soundName];
+            try{
+                this.update(url);                                                   // Передается адрес файла для отображения то он пошел в обработку.
+                let response = await fetch(url);
+                if(!response.ok) throw new Error(url); 
+                let responseBuffer = await response.arrayBuffer();
+                (function(thisPreloader){
+                    context.decodeAudioData(responseBuffer)
+                    .then(function(decodedBuffer){
+                        sounds.set(soundName, new Sound(context, decodedBuffer));   // Записываем получившийся звук в коллекцию звуков.
+                        thisPreloader.loadedFiles++;
+                        thisPreloader.update();                                     // Просто обновляется прогрессбар и строка процента буферизации.
+                        thisPreloader.loader(soundNames);
+                    });
+                })(this);
+            }catch(error){
+                this.update(url, true);                                             // В случае ошибки передается адрес файла, на котором споткнулся прелоадер.
+            }
+        }
+
+    }
+
+
+
+
+    soundsPreloader.init();
+
+/* 
+    console.log('Стартовали скрипт.');
+        let url = 'http://127.0.0.5:85/tomorrow-is-today.php';
+        ///// Загрузка (буферизация) аудиофайла.
+         async function loadFile(){
+            try{
+                let response = await fetch(url);
+                if(!response.ok) throw new Error(`Что-то пошло не так с файлом ${url} !`); 
+                let buffer = await response.arrayBuffer();
+                console.log(buffer);
+                this.loadedFiles++;
+                progressBar.update();
+                return true;
+            }catch(error){
+                console.log('Ошибка згрузки! '+ error.message);
+                return error.message;
+            }
+
+        }
+        loadFile();
+        setTimeout(()=>{
+            console.log('Закончили скрипт.');
+        }, 1000)
+*/
+    </script>
+</body>
+
+</html>

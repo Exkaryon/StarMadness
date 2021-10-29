@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background: #000;
+        }
+        .play {
+            border:solid 1px #000;
+            background: #059;
+            color: #fff;
+            border-radius: 5px;
+            padding: 5px 10px;
+            display: inline-block;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="play">Play</div>
+
+
+    <script>
+        class Buffer {
+            constructor(context, url) {
+                this.context = context;
+                this.url = url;
+                this.buffer;
+            }
+
+            loadSound(url){
+                let request = new XMLHttpRequest();
+                request.open('get', url, true);
+                request.responseType = 'arraybuffer';
+                let buff = this;
+                request.onload = function () {
+                    buff.context.decodeAudioData(request.response, function (buffer) {
+                        buff.buffer = buffer;
+                    });
+                }
+                request.send();
+            }
+
+            async loadSound2(url){
+                let response = await fetch(url);
+                    console.log(response)
+                if (response.ok) {
+                    let buffer = await response.arrayBuffer();
+                    console.log(buffer);
+                } else {
+                    console.log("Ошибка HTTP: " + response.status);
+                }
+            }
+
+            getSound() {
+                return this.buffer;
+            }
+        }
+
+
+
+        class Music {
+
+            constructor(context, buffer) {
+                this.context = context;
+                this.buffer = buffer;
+            }
+
+            setup() {
+                this.gainNode = this.context.createGain();
+                this.source = this.context.createBufferSource();
+                this.source.buffer = this.buffer;
+                this.source.connect(this.gainNode);
+                this.gainNode.connect(this.context.destination);
+
+                this.gainNode.gain.setValueAtTime(0.8, this.context.currentTime);
+            }
+
+            play() {
+                console.log(this)
+                this.setup();
+                this.source.start(this.context.currentTime);
+            }
+
+            stop() {
+                let ct = this.context.currentTime + 0.5;
+                this.gainNode.gain.exponentialRampToValueAtTime(0.001, ct);
+                this.source.stop(ct);
+            }
+
+        }
+
+        let play = document.querySelector('.play');
+        let context = new (window.AudioContext || window.webkitAudioContext)();
+        let musicURL = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/355309/G4.mp3';
+
+
+
+        let buffer = new Buffer(context, musicURL);
+        let soundLoader = buffer.loadSound2(musicURL);
+
+        let  audioBuffer = buffer.getSound();
+        setTimeout(function(){
+            console.log(audioBuffer)
+        },1000)
+
+// Затык здесь: аудиобуфер не успевает загрузисться до выполнения вызова гетсаунд. Что-то не так с работой реквеста. Нужен промис видимо.
+
+        let sound = new Music(context, buffer.getSound());
+
+
+        play.addEventListener('click', sound.play.bind(sound));
+
+    </script>
+</body>
+
+</html>

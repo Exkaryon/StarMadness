@@ -103,19 +103,19 @@ const render = {
                 this.layers[obj.id].ctx.clearRect(0, 0, this.layers[obj.id].canvas.width, this.layers[obj.id].canvas.height);
                 
                 // Контуры холста.
-/*                 this.layers[obj.id].ctx.rect (0, 0, this.layers[obj.id].canvas.width, this.layers[obj.id].canvas.height);
+                this.layers[obj.id].ctx.rect (0, 0, this.layers[obj.id].canvas.width, this.layers[obj.id].canvas.height);
                 this.layers[obj.id].ctx.strokeStyle = "#fff";
                 this.layers[obj.id].ctx.stroke();
-                this.layers[obj.id].ctx.clearRect(2, 2, this.layers[obj.id].canvas.width-4, this.layers[obj.id].canvas.height-4); */
+                this.layers[obj.id].ctx.clearRect(2, 2, this.layers[obj.id].canvas.width-4, this.layers[obj.id].canvas.height-4);
 
                 // Прозрачность всего, что рисуется ниже.
                 if(obj.alpha) this.layers[obj.id].ctx.globalAlpha = obj.alpha;      // Установка прозрачности объекта, если у него существует свойство alpha (используется для индикации возраждения).
 
                 // Фигуры (контуры и заливка) объектов.
-/*                 this.layers[obj.id].ctx.save();
+                this.layers[obj.id].ctx.save();
                 this.layers[obj.id].ctx.translate(this.layers[obj.id].canvas.width / 2, this.layers[obj.id].canvas.height / 2);     // Смещение контекста на 1/2 его размеров, чтобы его точка начала координат оказалась в центре холста слоя.
                 library.drawObject(this.layers[obj.id].ctx, obj);                                                                   // Отрисовка контуров и фона объекта по его параметрам.
-                this.layers[obj.id].ctx.restore(); */
+                this.layers[obj.id].ctx.restore();
 
                 // Текстуры и спрайты.
                 if(obj.paramsConst.texture) library.textureMapping(this.layers[obj.id].ctx, obj);   // Если для объекта назначена текстура, выполняется ее наложение на слой.
