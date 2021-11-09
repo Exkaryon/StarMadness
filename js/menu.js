@@ -2,6 +2,7 @@
 
 const menu = {  
     ready: false,                       // Флаг, указывающий, инициализированы ли раннее элементы меню.
+    musicNames: [],
     shipMods: function() {              // Массив имен всех модификаций кораблей имеющийся в конфиге.
         let mods = [];
         for (const key in config.shipMods) {
@@ -27,6 +28,7 @@ const menu = {
         main: {            // Главное меню
             basis: document.querySelector('#mainmenu'),
             items: document.querySelectorAll('#mainmenu .items > div'),
+            video: document.querySelectorAll('#mainmenu video'),
         },
 
         local: {          // Лобби мультиплеера
@@ -194,7 +196,6 @@ const menu = {
 
         // Подготовка главного меню.
         this.initializers.main();
-        this.show('main');
 
         // Подготовка Локального лобби.
         this.initializers.local();
@@ -207,8 +208,33 @@ const menu = {
 
         // Установка флага, указывающем о том, что меню инициализировано.
         this.ready = true;
+
+        // Сбор имен треков, которые могут воспроизводится в меню.
+        for (const sName in config.audio.files) {
+            if(config.audio.files[sName].type != 'menuMusic') continue;
+            this.musicNames.push(sName); 
+        }
+
+        // Запуск заставки
+        menu.intro();
     },
 
+
+    intro: function(){
+        this.elements.preloader = {basis: mediaLibrary.preloader.basis};                       // Добавляется блок предварительной загрузки в стек элементов, поскольку он должен быть в составе объекта menu, чтобы menu.show() его смог обработать.}
+        this.show('intro', 1000, () => {
+            // Стилистические эффекты для интро.
+            this.elements.intro.basis.children[0].style.animation = 'introzoom 5s ease-out forwards';
+            this.elements.intro.basis.children[0].children[1].style.animation = 'blink 5s ease forwards';
+            // Запуск музыки intro.
+            mediaLibrary.sounds.alienInvasion.play(1);
+            // Переход в меню.
+            setTimeout(() => {
+                this.show('main', 2000);
+                mediaLibrary.videoElements.serenity.element.play();
+            }, 6000);
+        });
+    },
 
 
 
@@ -445,21 +471,21 @@ const menu = {
       ////////////////////////////////////////////////////////////
      ///// Метод скрытия и показа элементов (разделов) меню /////
     ////////////////////////////////////////////////////////////
-    show: function(name, type){
+    show: function(blockName, fadeSpeed = 500, callback){
         for (const key in this.elements){
-            key == name 
-                ? async function(){
-                        menu.elements[key].basis.classList.add('trans_in');
-                        menu.elements[key].basis.classList.remove('inactive');
-                        await new Promise((resolve, reject) => setTimeout(resolve, 500));
-                        menu.elements[key].basis.classList.remove('trans_in');
-                    }()
-                : async function(){
-                        menu.elements[key].basis.classList.add('trans_out');
-                        await new Promise((resolve, reject) => setTimeout(resolve, 500));
-                        menu.elements[key].basis.classList.add('inactive');
-                        menu.elements[key].basis.classList.remove('trans_out');
-                    }();
+            if(key != blockName && !menu.elements[key].basis.classList.contains('inactive')){              // Поиск активного блока, т.е., который показывается, но не являющийся блоком назначения.
+                menu.elements[key].basis.style = `animation: trans_out ${fadeSpeed / 1000}s ease forwards`;
+                setTimeout(() => {
+                    menu.elements[key].basis.classList.add('inactive');
+                    menu.elements[key].basis.style = `animation: none`;
+                    menu.elements[blockName].basis.style = `animation: trans_in ${fadeSpeed / 1000}s ease forwards`;
+                    menu.elements[blockName].basis.classList.remove('inactive');
+                    if(callback) callback();
+                    setTimeout(() => {
+                        menu.elements[blockName].style = `animation: none`;
+                    }, fadeSpeed);
+                }, fadeSpeed);
+            }
         }
     },
 
@@ -476,4 +502,3 @@ const menu = {
 }
 
 
-!menu.ready ? menu.init() : menu.show();

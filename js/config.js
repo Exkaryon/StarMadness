@@ -1071,7 +1071,29 @@ const config = {
                 loop: false,
             } 
         }
+    },
 
+
+    audio: {
+        volume: {
+            menuMusic: 0.5,
+            gameMusic: 0.5,
+            gameSound: 0.5
+        },
+        files: {
+            alienInvasion: {
+                type: 'menuMusic',
+                url:'http://127.0.0.5:85/v_1.0_dev/media/alien_invasion.mp3',
+            },
+            tomorrowIsToday: {
+                type: 'menuMusic',
+                url:'http://127.0.0.5:85/audio/tomorrow-is-today.mp3',
+            },
+            epicArrival: {
+                type: 'gameMusic',
+                url:'http://127.0.0.5:85/audio/epic-arrival.mp3',
+            }
+        }
     }
 
 
