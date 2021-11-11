@@ -29,14 +29,17 @@ body {
     100% {opacity: 0;}
 }
 
+input {
+    font: normal 16px 'TT Lakes', Verdana;
+}
 
 button {
-    font: normal 22px 'TT Lakes', Verdana;
+    font: normal 20px 'TT Lakes', Verdana;
     letter-spacing: 0.05em;
     border:none;
     background: center center no-repeat;
-    background-image: url(../images/interface/button_bg_cyan.png);
-    color: #009090;
+    background-image: url(../images/interface/button_bg_blue.png);
+    color: #08b;
     text-shadow: 0 0 10px #7dcbcb;
     height: 58px;
     padding:0 35px;
@@ -53,7 +56,7 @@ button::before {
     left: -4px;
     bottom: 0;
     width: 16px;
-    background: url(../images/interface/button_bg_cyan.png) left center;
+    background: url(../images/interface/button_bg_blue.png) left center;
 }
 button::after {
     content: '';
@@ -63,7 +66,7 @@ button::after {
     right: -4px;
     bottom: 0;
     width: 16px;
-    background: url(../images/interface/button_bg_cyan.png) right center;
+    background: url(../images/interface/button_bg_blue.png) right center;
 }
 
 button:hover {
@@ -74,7 +77,8 @@ button:active {
 }
 
 
-/* WRAPPER */
+
+/* Wrapper */
 .wrapper {
     position: absolute;
     top:0;
@@ -83,6 +87,176 @@ button:active {
     height:100%;
     background-color: #000;
 }
+
+
+/* Headlines */
+.headline {
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    letter-spacing: 0.15em;
+}
+
+.headline h2 {
+    font-size: 110%;
+    font-weight: 400;
+    margin: 0;
+    text-shadow: 0 0 5px #07d, 0 0 10px #07d, 0 0 15px #07d, 0 0 25px #07d, 0 0 35px #07d;
+    text-transform: uppercase;
+}
+.headline div {
+    color: #07d;
+    text-transform: lowercase;
+    font-weight: 400;
+}
+
+
+/* Selectors */
+.selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selector > div:last-child {
+    position: relative;
+    cursor: pointer;
+}
+
+.selector div[data-select] {
+    position: absolute;
+    /*font-size: 90%;*/
+    right: 0px;
+    margin-top: -18px;
+    transition:all 0.3s ease;
+    padding: 5px 5px 0 5px;
+    z-index: 1;
+}
+
+.selector div[data-select] div {
+    border:none;
+    left: 0px;
+    height: 0;
+    overflow: hidden;
+    padding: 0px 9px;
+    margin: 0;
+    border-radius: 3px;
+    background: linear-gradient(#000, #0595);
+    color: #fff9;
+    transition:all 0.5s ease;
+    transform: translate(250px) scale(0);
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 5px #0599 inset, 0 0 9px #0599 inset, 0 0 14px #0599 inset,  0 0 10px #0599;
+    background: #000;
+}
+
+.selector div[data-select] div::before {
+    content: '';
+    border-radius: 3px;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: solid 1px #fff5;
+}
+
+.selector div[data-select] div.selected {
+    height: 28px;
+    padding: 5px 9px;
+    transform: translateX(0px);
+}
+
+.selector div:last-child > div div:hover{
+    color: #fff;
+    box-shadow: 0 0 5px #f009 inset, 0 0 9px #f009 inset, 0 0 14px #f009 inset;
+}
+
+.selector div[data-select].active {
+    box-shadow: 0 0 1px #fff,0 0 1px #fff,0 0 1px #059;
+    background: #000;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+.selector div[data-select].active::before,
+.selector div[data-select].active::after {
+    content: '';
+    position: absolute;
+    display: block;
+    border-radius: 5px;
+}
+.selector div[data-select].active::before {
+    top:-2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    box-shadow: 0 0 1px #059, 0 0 1px #059, 0 0 1px #fff;
+}
+
+.selector div[data-select].active::after {
+    top:-4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    box-shadow: 0 0 1px #059,0 0 1px #059,0 0 1px #059;
+}
+
+.selector div[data-select].active div {
+    padding: 5px 9px;
+    margin-bottom: 5px;
+    height: 28px;
+    transform: translateX(0px);
+}
+
+
+
+/* Itembox */
+.itembox {
+    position: relative;
+    border:solid 1px #069a;
+    border-radius: 15px;
+    box-shadow: 0 0 5px #0599 inset, 0 0 9px #0599 inset, 0 0 14px #0599 inset,  0 0 10px #0599;
+    transition: all 0.5s ease;
+}
+.itembox::before {
+    content: '';
+    position: absolute;
+    display: block;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: 15px;
+    background-color: #0129;
+    backdrop-filter: blur(10px);
+}
+.itembox .angles_top,
+.itembox .angles_bot {
+    position: absolute;
+    height: 32px;
+    right: -1px;
+    left:-1px;
+}
+.itembox .angles_top {top: -1px;}
+.itembox .angles_bot {bottom: -1px;}
+.itembox .angles_top::before,
+.itembox .angles_top::after,
+.itembox .angles_bot::before,
+.itembox .angles_bot::after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 32px;
+    height: 32px;
+    background-image: url(../images/interface/angles.png);
+}
+.itembox .angles_top::before {top: 0; left: 0; background-position: left top;}
+.itembox .angles_top::after  {top: 0; right: 0; background-position: right top;}
+.itembox .angles_bot::before {bottom: 0; left: 0; background-position: left bottom;}
+.itembox .angles_bot::after  {bottom: 0; right: 0; background-position: right bottom;}
 
 
 /* PRELOADER */
@@ -137,6 +311,9 @@ button:active {
 #preloader .progress.fatal_error .message {
     border-color: #f007;
 }
+#preloader .progress.fatal_error .message::before {
+    content: 'Ошибка! ';
+}
 #preloader .progress.fatal_error .bar {
     border-color:#f007;
 }
@@ -153,6 +330,9 @@ button:active {
     letter-spacing: 0.25em;
     color: #099;
 }
+
+
+
 
 
 
@@ -301,9 +481,524 @@ button:active {
 /* LOCAL */
 #local {
     display: flex;
-    justify-content: space-between;
+    justify-content:center;
+    flex-wrap: wrap;
+    background: url(../images/local_bg.jpg) center top no-repeat;
+    background-size: cover;
 }
 
-#local > div {
-    border:solid 1px #f90;
+
+#local .sets {
+    color: #0af;
+    font-size: 90%;
+    white-space: nowrap;
+    padding: 0 10px;
+}
+#local .sets[data-setname="common"] {
+    min-width: 360px;
+}
+#local .sets[data-setname="players"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: space-between;
+    max-width: 740px;
+}
+#local .sets .options {
+    padding: 10px 25px;
+    margin: 10px;
+}
+#local .sets[data-setname="players"] .options {
+    width: calc(50% - 20px);
+}
+#local .sets .options[data-active="inactive"] {
+    border:dotted 1px red;
+    transform: scale(0.5);
+    filter: blur(5px) grayscale(1);
+}
+#local .sets .options[data-active="inactive"]::before {
+    content: '';
+    position: absolute;
+    top:0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10;
+}
+#local .sets .title {
+    position: relative;
+    margin: 10px 0;
+    text-align: center;
+    font-size: 110%;
+    color: #8ed2fb;
+    text-transform: uppercase;
+}
+#local .sets .title::before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 5px;
+    transform: scaleY(0.1);
+    background: linear-gradient(90deg, #0590, #f00, #0590);
+}
+
+#local .sets .capname {
+    margin-top: 25px;
+    position: relative;
+}
+#local .sets .capname label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#local .sets .capname label > div {
+    position: relative;
+}
+#local .sets .capname input[type="text"] {
+    border:none;
+    background: none;
+    padding: 5px 9px;
+    width: 150px;
+    color: #f90;
+    letter-spacing: 0.1em;
+    font-size: 90%;
+    outline: none;
+    text-align: center;
+/*     color: #07e;
+    text-shadow: 0 0 38px #059, 0 0 28px #059, 0 0 24px #059, 0 0 20px #059, 0 0 14px #059, 0 0 8px #059, 0 0 4px #059; */
+
+}
+
+
+
+#local .sets .capname input + div {
+    position: absolute;
+    height: 5px;
+    border-radius: 50%;
+    width: 100%;
+    bottom: 0;
+    background: #0595;
+    transform: scaleY(0.1);
+}
+
+#local .sets .capname input + div::before {
+    content: '';
+    height: 1px;
+    background: #fff;
+    width: 80%;
+    margin-left: 10%;
+    margin-top: 1px;
+    position: absolute;
+    filter: blur(5px);
+}
+
+#local .sets .capname input + div::after {
+    content: '';
+    height: 5px;
+    background: #fff9;
+    width: 40%;
+    margin-left: 30%;
+    position: absolute;
+    filter: blur(10px);
+    transform: scaleY(0.5);
+}
+#local .sets .capname input:focus {color: #fff;}
+#local .sets .capname input:focus + div   {background: #f009;  filter: blur(2px); transform: scaleY(0.3);}
+#local .sets .capname input:focus + div::before {background: #f00;}
+#local .sets .capname input:focus + div::after  {background: #fff;}
+#local .sets .option {
+    position: relative;
+    margin: 25px 0;
+}
+#local .sets .ships {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+#local .sets .ships > div {
+    width: 50px;
+    height: 50px;
+    margin: 0 5px 10px 0; 
+    background: #000;
+    border:solid 1px #069;
+    border-radius: 5px;
+    color: #069;
+    box-shadow: 0 0 5px #069 inset, 0 0 15px #0695 inset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    transition: all 0.5s ease;
+}
+#local .sets .ships > div::after {
+    content: '?';
+    position: absolute;
+    top:0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10;
+    font-size: 32px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#local .sets .ships > div[data-active="inactive"] {
+    position: relative;
+    filter: blur(5px) grayscale(1);
+    opacity: 0.5;
+}
+#local .sets .ships.selective > div[data-active="active"] {
+    cursor: pointer;
+}
+#local .sets .ships.selective > div[data-active="active"]:hover {
+    border:solid 1px #f00;
+    box-shadow: 0 0 5px #f00 inset, 0 0 15px #f005 inset;
+}
+#local .sets .ships.selective > div::after {
+    content: '';
+    top:5px;
+    right: 5px;
+    left: 5px;
+    bottom: 5px;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+#local .sets .ships.selective > div[data-mod="ranger"]::after {background-image: url(../images/gameplay/ranger.png);}
+#local .sets .ships.selective > div[data-mod="predator"]::after {background: #059;}
+#local .buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px;
+    max-width: 1100px;
+}
+
+/* HANGAR */
+#hangar {
+    display: flex;
+    justify-content: center;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    background: url(../images/hangar_bg.jpg) center top no-repeat;
+    background-size: cover;
+}
+
+
+#hangar .fleet {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 20px 0;
+}
+
+#hangar .fleet > div {
+    width: 50px;
+    height: 50px;
+    border:solid 1px #069;
+    background-color: #000;
+    box-shadow: 0 0 5px #069 inset, 0 0 15px #0695 inset;
+    border-radius: 5px;
+    margin: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+#hangar .fleet > div:hover {
+    border:solid 1px #f00;
+    box-shadow: 0 0 5px #f00 inset, 0 0 15px #f005 inset;
+}
+
+#hangar .fleet > div.focus::before {
+    content: '';
+    position: absolute;
+    top:-20px;
+    right: -20px;
+    left: -20px;
+    bottom: -20px;
+    animation: pulse 1.5s ease infinite;
+    background: url(../images/focus.png) no-repeat;
+    background-size: cover;
+}
+
+@keyframes pulse {
+    0% {transform: scale(1) rotate(0);}
+    25% {transform: scale(0.9) rotate(5deg);}
+    50% {transform: scale(1.1) rotate(-5deg);}
+    75% {transform: scale(0.9) rotate(5deg);}
+    100% {transform: scale(1) rotate(0deg);}
+}
+
+#hangar .fleet > div::after {
+    content: '';
+    position: absolute;
+    top:5px;
+    right: 5px;
+    left: 5px;
+    bottom: 5px;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+#hangar .fleet > div[data-mod="ranger"]::after {background-image: url(../images/gameplay/ranger.png);}
+#hangar .fleet > div[data-mod="predator"]::after {background: #059;}
+
+
+#hangar .ships {
+    display: flex;
+    justify-content:center;
+    max-width: 1100px;
+    padding: 10px;
+    align-items: flex-start;
+}
+
+#hangar .ships .mod{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 20px 20px 50px;
+    min-width: 360px;
+    align-content: flex-start;
+    position: relative;
+    cursor: pointer;
+    transition: box-shadow 0.5s ease;
+    box-shadow: 0 0 15px #0690,  0 0 25px #0690;
+}
+
+#hangar .ships .mod:hover {
+    box-shadow: 0 0 15px #0699,  0 0 25px #0699;
+}
+#hangar .ships .mod:active {
+    top: 1px;
+    left: 1px;
+}
+
+#hangar .ships .mod::after  {
+    content: 'Нажмите, чтобы выбрать';
+    position: absolute;
+    width: 100%;
+    left:0;
+    bottom:10px;
+    text-align: center;
+    color: #069;
+    font-size: 90%;
+}
+#hangar .ships .mod .title,
+#hangar .ships .mod .pic,
+#hangar .ships .mod .chars {
+    position: relative;
+}
+
+
+#hangar .ships .mod .title {
+    width: 100%;
+    margin: 0 0 20px;
+    text-align: center;
+    font-size: 110%;
+    color: #8ed2fb;
+    text-transform: uppercase;
+}
+
+#hangar .ships .mod .title::before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 5px;
+    transform: scaleY(0.1);
+    background: linear-gradient(90deg, #0590, #f00, #0590);
+}
+
+#hangar .ships .mod .pic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+}
+#hangar .ships .mod .pic img {
+    max-width: 100%;
+    margin-left: -15px;
+}
+#hangar .ships .mod .chars {
+    width: calc(100% - 100px);
+    color: #0af;
+    font-size: 90%;
+}
+#hangar .ships .mod .chars > div {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    align-items: center;
+}
+#hangar .ships .mod .chars > div > div {
+    width: 50%;
+    white-space: nowrap;
+}
+
+
+#hangar .ships .mod .chars .bar {
+    border:solid 1px #058;
+    position: relative;
+    height: 100%;
+}
+#hangar .ships .mod .chars .bar div {
+    background: linear-gradient(90deg, #0b5686, #0989ca);
+    height: 13px;
+}
+#hangar .ships .mod .chars .bar span {
+    position: absolute;
+    display: block;
+    text-align: center;
+    left:0;
+    top:0;
+    width: 100%;
+    color:#08c;
+    font-size: 72%;
+    font-weight: 600;
+    mix-blend-mode:difference;
+}
+
+
+#hangar .buttons {
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+}
+
+
+/* GAME SCREEN */
+#gamescreen {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#gamescreen canvas {
+    background: url(../images/space_bg.jpg) right bottom no-repeat#000;
+    background-size: cover;
+}
+#gamescreen .dashboard {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 200;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+}
+#gamescreen .victory {
+    position: fixed;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    color: #fff;
+}
+#gamescreen .victory.show {
+    opacity: 1;
+}
+#gamescreen .victory > div:first-child {font-size: 5em;}
+#gamescreen .victory > div:last-child {font-size: 2.5em;}
+#gamescreen .pausebox {
+        position: fixed;
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        background: #0009;
+        color: #fff;
+        border: solid 1px #f11c;
+        box-shadow: 0 0 29px #f005, 0 0 20px #f005, 0 0 15px #f005 inset, 0 0 15px #f005 inset;
+}
+#gamescreen .pausebox > div {
+    text-transform: lowercase;
+    font-size: 2.3em;
+    font-weight: 100;
+    color: #f00;
+}
+#gamescreen .pausebox > button {
+    margin-top: 15px;
+} 
+#gamescreen .dashboard > div {
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    justify-content: start;
+    min-width: 250px;
+    color: #fff;
+    transition: all 1.5s ease-in;
+}
+#gamescreen .dashboard > div.gameover {
+    transform: translateY(250px) rotate(-50deg);
+    opacity: 0;
+}
+#gamescreen .dashboard .avatar {
+    display: block;
+    width: 75px;
+    height: 75px;
+    border-radius: 5px;
+    border: solid 1px;
+    background: url(../images/player1.png) no-repeat;
+    background-size: cover;
+}
+#gamescreen .dashboard .stat {
+    width: calc(100% - 85px);
+    margin-left: 10px;
+}
+#gamescreen .dashboard .healt {
+    font-size: 12px;
+}
+#gamescreen .dashboard .healt > div {
+    display: inline-block;
+    height:10px;
+    width: 100px;
+    border:solid 1px #fff3;
+    background: #0005;
+    margin-top: 8px;
+}
+#gamescreen .dashboard .healt > div > div{
+    height: 8px;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+#gamescreen .dashboard .healt > div > div > div {
+    height: 10px;
+    width: 100px;
+    background: linear-gradient(90deg, #f00, #059);
+}
+#gamescreen .dashboard .fleet {
+    display: flex;
+    justify-content: start;
+}
+#gamescreen .dashboard .fleet > div {
+    margin-top: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 2px;
+    border:solid 1px #fff5;
+    margin-right: 3px;
+    transition: all 1s ease-in;
+}
+#gamescreen .dashboard .fleet > div.active {
+    border:solid 1px green;
+}
+#gamescreen .dashboard .fleet > div.destroyed {
+    position: relative;
+    margin-left: -33px;
+    opacity: 0;
+    transform: translateY(70px) rotate(-50deg);
 }

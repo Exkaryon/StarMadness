@@ -21,6 +21,10 @@ const menu = {
      ///// DOM-элементы меню  /////
     //////////////////////////////
     elements: {
+        preloader:{
+            basis: document.querySelector('#preloader'),
+        },
+
         intro: {           // Вступительная демка
             basis: document.querySelector('#intro'),
         },
@@ -57,6 +61,9 @@ const menu = {
             fleet: {},
             ships: {},
             button:{},
+        },
+        gamescreen: {
+            basis: document.getElementById('gamescreen'),
         }
     },
 
@@ -75,12 +82,18 @@ const menu = {
                 </div>
             </div>
         `,
-        commonOptions: `<div class="options">{{ options }}</div>`,
+        commonOptions: `
+            <div class="options itembox">
+            <div class="title">Геймплей</div>
+                {{ options }}
+                <div class="angles_top"></div>
+                <div class="angles_bot"></div>
+            </div>`,
         playersOptions: `
-            <div class="options" data-playernum="{{ num }}" data-active="{{ active }}">
-                <div class="title">Капитан {{ num }}</div>
-                <div>
-                    <label class="inputtext">
+            <div class="options itembox" data-playernum="{{ num }}" data-active="{{ active }}">
+                <div class="title">Игрок {{ num }}</div>
+                <div class="capname">
+                    <label>
                         <div>Имя:</div>
                         <div>
                             <input type="text" name="playername" value="{{ captain }}">
@@ -92,19 +105,24 @@ const menu = {
                 <div class="ships">
                     {{ ships }}
                 </div>
+                <div class="angles_top"></div>
+                <div class="angles_bot"></div>
             </div>
         `,
         hangar: `
             <div class="fleet">&nbsp;</div>
             <div class="ships">{{ ships }}</div>
-            <button>Готово</button>
+            <div class="buttons"><button>Готово</button></div>
         `,
         shipsBox: `
-            <div data-mod="{{ boatMod }}">
-                <div>{{ boatPic }}</div>
-                <div>
+            <div data-mod="{{ boatMod }}" class="mod itembox">
+                <div class="title">{{ boatMod }}</div>
+                <div class="pic">{{ boatPic }}</div>
+                <div class="chars">
                     {{ boatChars }} 
                 </div>
+                <div class="angles_top"></div>
+                <div class="angles_bot"></div>
             </div>
         `
     },
@@ -171,17 +189,22 @@ const menu = {
         },
         hangar: function(){
             // Формирование ангара (модального слоя выбора кораблей).
-            menu.elements.hangar.basis.insertAdjacentHTML('beforeend', menu.hangarGenerator());
-            menu.elements.hangar.fleet = document.querySelector('#hangar .fleet');
-            menu.elements.hangar.ships = document.querySelector('#hangar .ships');
-            menu.elements.hangar.button = document.querySelector('#hangar button');
-            menu.elements.hangar.button.addEventListener('click', () => {    // Закрытие модального слоя "ангара" с последующим обновлением состояния конфига для выбранного игрока и набора модов в лобби. (Данный "слушатель" был извлечен из метода shipsSelector, поскольку там он назначался на кнопку с каждым вызовом этого метода, что приводило к суммированию этих слушателей на кнопке и последующему многократному вызову апдейта.)
-                menu.elements.hangar.basis.classList.add('trans_out');
+            this.elements.hangar.basis.insertAdjacentHTML('beforeend', menu.hangarGenerator());
+            this.elements.hangar.fleet = document.querySelector('#hangar .fleet');
+            this.elements.hangar.ships = document.querySelector('#hangar .ships');
+            this.elements.hangar.button = document.querySelector('#hangar button');
+            this.elements.hangar.button.addEventListener('click', () => {    // Закрытие модального слоя "ангара" с последующим обновлением состояния конфига для выбранного игрока и набора модов в лобби. (Данный "слушатель" был извлечен из метода shipsSelector, поскольку там он назначался на кнопку с каждым вызовом этого метода, что приводило к суммированию этих слушателей на кнопке и последующему многократному вызову апдейта.)
+                
+                this.show('local');  // Аргумент должен быть переменной, в которой будет писаться блок, откуда ппришли в ангал (это или local или online)
+                
+                /*                 menu.elements.hangar.basis.classList.add('trans_out');
                 setTimeout(() => {
                     menu.elements.hangar.basis.classList.add('inactive');
                     menu.elements.hangar.basis.classList.remove('trans_out');
-                }, 500);
-                menu.update('players', menu.playerChoice.hangar.player, 'shipsSelector', Array.from(menu.elements.hangar.fleet.children));
+                }, 500); */
+
+
+                this.update('players', this.playerChoice.hangar.player, 'shipsSelector', Array.from(this.elements.hangar.fleet.children));
             });
         }
     },
@@ -201,7 +224,7 @@ const menu = {
         this.initializers.local();
 
         // Подготовка ангара.
-        this.initializers.hangar();
+        this.initializers.hangar.call(this);
 
         // Обработчик селекторов.
         this.selectorsHandler();
@@ -216,12 +239,11 @@ const menu = {
         }
 
         // Запуск заставки
-        menu.intro();
+        //menu.intro();
     },
 
 
     intro: function(){
-        this.elements.preloader = {basis: mediaLibrary.preloader.basis};                       // Добавляется блок предварительной загрузки в стек элементов, поскольку он должен быть в составе объекта menu, чтобы menu.show() его смог обработать.}
         this.show('intro', 1000, () => {
             // Стилистические эффекты для интро.
             this.elements.intro.basis.children[0].style.animation = 'introzoom 5s ease-out forwards';
@@ -418,14 +440,15 @@ const menu = {
         let shipsHTML = '';
         for (const key in config.shipMods) {
             shipsHTML += this.templates.shipsBox
-                .replace(/{{ boatMod }}/, config.shipMods[key].model)
+                .replace(/{{ boatMod }}/g, config.shipMods[key].model)
                 .replace(/{{ boatPic }}/, config.textures[key] ? config.textures[key].pic.outerHTML : '!!!')
                 .replace(/{{ boatChars }}/, function(){
                     return `
-                        <div><div>Название судна:</div><div>${config.shipMods[key].model}</div></div>
-                        <div><div>Масса:</div><div>${config.shipMods[key].paramsConst.weight}</div></div>
-                        <div><div>Макс. скорость:</div><div>${config.shipMods[key].paramsConst.topSpeed}</div></div>
-                        <div><div>Прочность:</div><div>${config.shipMods[key].paramsConst.durability}</div></div>
+                        <div><div>Скорость:</div><div class="bar"><div style="width:${Math.round(config.shipMods[key].paramsConst.topSpeed / 10 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.topSpeed} км/с</span></div></div>
+                        <div><div>Масса:</div><div class="bar"><div style="width:${Math.round(config.shipMods[key].paramsConst.weight / 1000 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.weight} тонн</span></div></div>
+                        <div><div>Прочность:</div><div class="bar"><div style="width:${Math.round(config.shipMods[key].paramsConst.durability / 10 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.durability} ед.</span></div></div>
+                        <div><div>Осн.оружие:</div><div class="bar"><div style="width:${Math.round(config.bulletMods[config.shipMods[key].paramsConst.weapon[0]].paramsConst.energyСharge / 1000 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.weapon[0]}</div></div>
+                        <div><div>Суп.оружие:</div><div class="bar"><div style="width:0">&nbsp;</div><span>${config.shipMods[key].paramsConst.superWeapon[0]}</span></div></div>
                     `;
                 });
         }
@@ -440,9 +463,7 @@ const menu = {
     /////////////////////////////////////////////////////
     shipsSelector: function(){
         // Открытие модального слоя "ангара" с модификациями кораблей.
-        this.elements.hangar.basis.classList.remove('inactive');
-        this.elements.hangar.basis.classList.add('trans_in');
-        setTimeout(() => {this.elements.hangar.basis.classList.remove('trans_in')}, 500);
+        this.show('hangar');
         // Формирование ячеек флота для модального слоя "ангара".
         let cells = '';
         config.gameSettings.players[this.playerChoice.hangar.player-1].shipMods.forEach((ship, k) => {
@@ -495,9 +516,11 @@ const menu = {
      ///// Запуск геймплея /////
     ///////////////////////////
     gameplay: function(){
-        menu.show('gamescreen');
-        universe.init();
-        dashboard.init();
+        menu.show('gamescreen', 1000, () => {
+            universe.init();
+            dashboard.init();
+        });
+
     }
 }
 

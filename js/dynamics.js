@@ -62,7 +62,9 @@ const universe = {
     init(){
         // Определить размеры обертки и назначить их размерами Вселенной.
         this.DOM_Elem.wrapper = document.getElementById('gamescreen');
+        console.dir(this.DOM_Elem.wrapper)
         this.spaceSize        = [this.DOM_Elem.wrapper.offsetWidth/* - 20*/, this.DOM_Elem.wrapper.offsetHeight/* - 20*/];
+
 
         // Создание пользовательких объектов (космолетов) в игровом пространстве из коллекции (флота) пользователя.
         this.respawn();
@@ -74,6 +76,7 @@ const universe = {
         render.init();
 
         // Запуск времени Вселенной
+        this.timeFlow = true;
         this.quantumSwitch();
 
         // Инициализация метода паузы геймплея.

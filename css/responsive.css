@@ -58,6 +58,38 @@
         max-width: none;
     }
 
+
+    /* LOCAL */
+    #local {
+        flex-wrap: nowrap;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding-bottom: 20px;
+    }
+    #local .sets,
+    #local .sets[data-setname="players"],
+    #local .buttons {
+        max-width: 360px;
+        margin: 0 0 20px;
+        padding: 0 10px;
+        
+    }
+
+    #local .sets[data-setname="common"] .options, 
+    #local .sets[data-setname="players"] .options {
+        width: 100%;
+        margin:10px 0;
+    }
+
+    #local .sets .options[data-active="inactive"] {
+        display: none;
+    }
+
+    #local .buttons {
+        padding-bottom: 30px;
+    }
+
 }
 
 
