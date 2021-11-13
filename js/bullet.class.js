@@ -71,8 +71,8 @@ class bullet {
             Math.round(this.paramsVariable.location[1] + this.paramsVariable.muzzleDist * -iV[1])
         ]; 
         // Расчет скорости пули относительно направления и скорости родителя.
-        this.paramsVariable.currentSpeed[0] = this.paramsConst.speed[0] / this.paramsConst.weight *  iV[0] + this.paramsVariable.currentSpeed[0];
-        this.paramsVariable.currentSpeed[1] = this.paramsConst.speed[0] / this.paramsConst.weight * -iV[1] + this.paramsVariable.currentSpeed[1];
+        this.paramsVariable.currentSpeed[0] = this.paramsConst.speed[0] *  iV[0] + this.paramsVariable.currentSpeed[0];
+        this.paramsVariable.currentSpeed[1] = this.paramsConst.speed[0] * -iV[1] + this.paramsVariable.currentSpeed[1];
 
         switch(this.paramsConst.formType){
             case 'polygon':

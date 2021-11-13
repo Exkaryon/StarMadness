@@ -14,17 +14,17 @@ const config = {
      ///// Модификации космолетов /////
     //////////////////////////////////
     shipMods: {
-        ranger: {                                                       // Уникальное идентификационное имя объекта.
+        ranger: {                                                       // Уникальное идентификационное имя модели.
             model: 'ranger',                                            // Наименование модели объекта (модификация), характерезующее его уникальные параметры. Свойство повторяет имя своего родителя.
             paramsConst: {                                              // Комплект свойств, которые не меняются во время жизни космолета, но могут быть изменены в процессе его инициализации (создания).
                 formType: 'polygon',                                    // Тип фигуры объекта. В зависимости от типа (polygon/circle) применяются разные функции расчета физики и отрисовки при рендеринге.
-                weapon: ['plasma', 0],                                  // Базовое оружие данного космолета [модель оружия, % заряда].
-                superWeapon: ['rocket', 0],                             // Супер оружие [модель оружия, % заряда].
+                weapon: ['plasma', 5],                                  // Базовое оружие данного космолета [модель оружия, время зарядки в квантах].
+                superWeapon: ['iridiumcore', 600],                       // Супер оружие [модель оружия, % заряда].
                 reflection: false,                                      // Параметр указывает, меняется ли градус поворота объекта при рикошете от границ вселенной.
                 topSpeed: 5,                                            // Максимально возможная скорость, например, х1000 метров в секунду.
                 rotationSpeed: 3,                                       // Скорость вращения (градусов за квант). Значение должно быть кратно 360.
                 weight: 50,                                             // Масса объекта, например, в тоннах. Используется для физики динамических эффектов (энерция, столкновения и т.д.) и для расчета инкремента скорости в методах движения. 
-                durability: 1,                                          // Коэффициент прочности корабля от 1 до 10.
+                durability: 10,                                          // Коэффициент прочности корабля от 1 до 10.
                 fragmentation: 3,                                       // Фрагменация на осколки при разрушении. Кол-во фрагментов равно от 0 до n. 0 - нет фрагментации. Свойство может отсутствовать.
                 texture: {},                                            // Параметры тектуры для объекта. Присваиваются из конфига при инициализации объекта соответсвенно имени объекта. Свойство необязательное и если оно отсутствует, текстура не присваивается.
                 sprites: {},                                            // Спрайты для объекта. Присваиваются из конфига спрайтов при инициализации объекта соответсвенно имени объекта. Если свойство отсутствует, спрайты не присваивается и не обрабатываются.
@@ -93,23 +93,56 @@ const config = {
                 reflection: true,                                       // Параметр указывает, меняется ли градус поворота объекта при рикошете от границ вселенной.
                 speed: [10, false],                                     // Собственная скорость пули. Второй параметр указывает статичная скорость (false) или вариативная/случайная от 0 до n (true).
                 rotationSpeed: 0,                                       // Максимальная скорость вращения от 0 до n в пределах значения которой (от -n до n) будет случайно выбран параметр вращения при инициализации обекта. Значение должно быть кратно 360.
-                weight: 1,                                              // Масса объекта, например, в тоннах. Используется для физики динамических эффектов (энерция, столкновения и т.д.) и для расчета инкремента скорости в методах движения. 
-                durability: 1,                                          // Коэффициент прочности.
-                chargeTime: 60,                                         // Время восполнения заряда в квантах (кол-во итераций 60 ~ 1сек)
-                energyСharge: 100,                                      // Энергетическая вооруженность снаряда (деструктивная сила снаряда) измеряемая в единицах health*durability (целостность на коэффициент прочности).
+                weight: 1,                                              // Масса объекта, например, в тоннах от 1 до 100. Используется для физики динамических эффектов (энерция, столкновения и т.д.) и для расчета инкремента скорости в методах движения. 
+                durability: 1,                                          // Коэффициент прочности. От 1 до 10.
+                energyСharge: 100,                                      // Энергетическая вооруженность снаряда от 0 до 1000 (деструктивная сила снаряда) измеряемая в единицах health*durability (целостность на коэффициент прочности). Свойство может остутсвовать.
                 lifeTime: 160,                                          // Время существования во Вселенной в квантах (кол-во итераций 60 ~ 1сек)
                 texture: {},                                            // Параметры тектуры для объекта. Присваеваются из конфига при инициализации объекта. Если свойство отсутствует, текстура не присваивается.
                 //sprites: {},                                          // Спрайты для объекта. Присваиваются из конфига при инициализации объекта соответсвенно имени объекта. Если свойство отсутствует, спрайты не присваивается.
                 effects: {                                              // Набор эффектов состоящие из пар: тип эффекта / коллекция идентификационных имен эффектов, которые будут выбираться случайно, если их больше чем один. Свойство может быть пустым, но не может отсутсвтовать!
                     explosions: ['miniBangV1', 'miniBangV2'],
                 },
-                radius: 4,                                             // Для круглых объектов указывается радиус их размера. Св-во игнорируется, если тип формы объекта не circle.
-                vertices: [                                             // Для полигональных объектов указываются вершины. Координаты вершин объекта X,Y (строго поочередно). Св-во игнорируется, если тип объекта не polygon.
-                    [-40 , -40],
-                    [50, -50],
-                    [30, 30],
-                    [-20, 20],
-                ]
+                radius: 4,                                              // Для круглых объектов указывается радиус их размера. Св-во игнорируется, если тип формы объекта не circle.
+                vertices: [],                                           // Для полигональных объектов указываются вершины. Координаты вершин объекта X,Y (строго поочередно). Св-во игнорируется, если тип объекта не polygon.
+            }
+        },
+        fireball: {
+            model: 'fireball',
+            paramsConst: {
+                formType: 'circle',
+                reflection: true,
+                speed: [10, false],
+                rotationSpeed: 0,
+                weight: 1,
+                durability: 1,
+                energyСharge: 100,
+                lifeTime: 160,
+                texture: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 4,
+                vertices: [],
+            }
+        },
+        iridiumcore: {
+            model: 'iridiumcore',
+            /* boundaryIgnore: true, */
+            paramsConst: {
+                formType: 'circle',
+                reflection: true,
+                speed: [10, false],
+                rotationSpeed: 0,
+                weight: 25,
+                durability: 5,
+                energyСharge: 0,
+                lifeTime: 180,
+                texture: {},
+                effects: {
+                    explosions: ['miniBangV1', 'miniBangV2'],
+                },
+                radius: 8,
+                vertices: [],
             }
         },
         laser: {                                                        // Лазер - линейный вид.
@@ -119,25 +152,7 @@ const config = {
 
         },
         mine: {                                                         // Мина - вид окружности.
-            model: 'mine',
-            paramsConst: {
-                formType: 'circle',
-                reflection: false,
-                speed: [2, false],
-                rotationSpeed: 0,
-                weight: 1,
-                durability: 1,
-                chargeTime: 60,
-                energyСharge: 100,
-                lifeTime: 230,
-                //texture: {},
-                //sprites: {},
-                radius:10,
-                //vertices: [
-                //    [0, 10],
-                //    [10, 0],
-                //]
-            }
+
         }
     },
 
@@ -557,10 +572,11 @@ const config = {
                 shipMods: [],                                               // Набор имен кораблей ['ranger', 'predator', ...]. Первичное значение устанавливается и регулируется из лобби.
                 driverType: 'human',                                        // Игрок - человек или AI (human/ai). Установлено значение по умолчанию. Регулируется из лобби.
                 controls: {                                                 // Клавиши управления и статус активности [Двигатель, поворот влево, вправо, стрельба].
-                    engine:  ['ArrowUp',   'impulse'],                      // Имя действия: [клавиша управления, имя метода, *статус активности]  * - флаг, назначаемый при инициализации космолета и изменяемый по клавишам контроля.
-                    left:    ['ArrowLeft', 'rotate'],
-                    right:   ['ArrowRight','rotate'],
-                    strike:  ['Space',     'strike'],
+                    engine:     ['ArrowUp',   'impulse'],                   // Имя действия: [клавиша управления, имя метода, *статус активности]  * - флаг, назначаемый при инициализации космолета и изменяемый по клавишам контроля.
+                    left:       ['ArrowLeft', 'rotate'],
+                    right:      ['ArrowRight','rotate'],
+                    shot:       ['Space',     'shot'],
+                    supershot:  ['ControlRight', 'superShot'],
                 },
             },
             {
@@ -573,7 +589,7 @@ const config = {
                     engine:  ['KeyW', 'impulse'],
                     left:    ['KeyA', 'rotate'],
                     right:   ['KeyD', 'rotate'],
-                    strike:  ['ControlLeft', 'strike'],
+                    shot:    ['ControlLeft', 'shot'],
                 },
             },
             {
@@ -586,7 +602,7 @@ const config = {
                     engine:  [null, 'impulse'],
                     left:    [null, 'rotate'],
                     right:   [null, 'rotate'],
-                    strike:  [null, 'strike'],
+                    shot:    [null, 'shot'],
                 },
             },
             {
@@ -599,7 +615,7 @@ const config = {
                     engine:  [null, 'impulse'],
                     left:    [null, 'rotate'],
                     right:   [null, 'rotate'],
-                    strike:  [null, 'strike'],
+                    shot:    [null, 'shot'],
                 },
             },
         ],
@@ -660,7 +676,23 @@ const config = {
                 img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAARBAMAAADqGAscAAAAJFBMVEX/AKYAAAD/AKL/AKWAlf90i/9qg/9ifP9bdv/M1P+yv/+Zqv8TN9GXAAAACXRSTlNJADcS/uC2hUYbbLO8AAAAMElEQVQI12OQEGAQF2AQE2AwNWBQUWDgZmDgYmDghCAQGyTCwsCgqsBgZgBUCVQPAD19AmJPXqskAAAAAElFTkSuQmCC';
                 return img;
             }(),
-            size: [3, 17]
+            size: [3, 17],
+        },
+        fireball: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABM1JREFUeNqMV0lvHUUQrl5m3hbHxmAJORDJIc9CAYFQIogJCE78C7ggfhgnLlwQ50hBsoEDBEUKhCQKNmAUTAhW/PDy3pvuYqbX6p4xMFKr1+n6aq9m+CNwAGChYZj7r1nLPwbdH3acwmTf3qbdOsqMMO8gmo5PA2ZnrBMIJDuWHgPVTGVG3F8ae8jmeApvjFwfdzwo7AAiGhBeAjlxlqDFZMyIMBn5g0JEIhHMIKDh335cOu4hIZ4TRgdS172uezStDcDvMneSBWKYAfFjJjMDzAH4a4W52jZRa8+DiGJNT6kA1zaqzOSTgftUSx6/JyjctcKRiaSMIB1MZU40jTsQzRic1Uc7IcBlZsdU7JGgqs9VZtz0koBgAYAnqOsTDTBJJCmMxaug5mioiQqgQ+yeuHR9QeYi2E8Uf7PTwKnMHSKx+YZz7QAEA5VE/JF7L3ZPrCHs29z1bQDKEWeJpnliWejIB3OUSQyL1s4dPyJwbgmXdV86MFYVEP6oCCjWUixzt8ZwxXwkhMQTvKupoHPPfQlT6DkApZ5C+egRG87q88+u4GExqHcwRFLKUnRLqwId5NApAe9qmuh+biRguZ9B/9ZNvrp3e3BtUffHf00qfoPNti9emW1tXFU7Lc6tdITxEW28g1H5yJaHRnu2QFIbKO98J1Z//nLh/Y3Xn9/or41KrHk++ObJG99uPVz/qpp8vPGWepBYkXdN7UAgkXZQQR5e0TlWvMYAmR9DeWtTXrs0PPPm6JXlQr07BiF7sDS6LV7cnVzZ/Ppo56VX1W9nC2MPjfSsVygjA2qKIe7wTo3ZhMlDMHJg9h6zYX9ajofnBwW+PQa59iGI8x8Au/wCrKwNmTguxvd/ZWed9HhQACRcd0TC//lNFbCThR4fPd0DWFiqV86BxiPAxRHgoIk9nCN1Q/3fd/IsZ9PUg0liqXlZfQaPJnK2/fefc6Vu3gN19AnoyafA7/4C+3sKHhYn2xfO4QH9hwR67KoTZJKAYwpKndGmn2owgtn45cOt/Z8O15/7/P5luLfHi1EJf+we4WcP9r9fea36YnkJToL/8GBBOgtIwewZ/gCDoKto9Y27ebezvj+Fft33mvn1LXHhYPepd870F8YHleKbvz/euXTx8MZH78Hd+sS09pcT80dpxjPXz824ceqYLTECwJBIY+Sj/m+Jh/7JBPp3aoNT9TXrqzhZWYZjA7cghH2Tpp8b4g2LPJi4lokPxFBkU6p2iSW34PrMYu1qVxdrC7TJxYetmQEhHTFPUAS/0En11PICGrOtLKjGYqSwAUaGesACaEDPA6dF4FY5ACq7zYXidIERECpLqTmAyqkNEuXZ5jm3c8o9JDWXkQAtrGyaYCHPsVZK5a7ykaQiAgeKh9KlImPPfUv8uQowK621q2QwS6nCSYBnRbYmZZgielct7onNyaxWpwDAlFEiS6naJRaRGGbqR+3CFLPSPZEAdr5gYjEdy1NtcjnPshqQKjJGwDz1sIx75gEwU6uxpGJlyauGhfKBu2ICW94BHcQgIwwdeyYOaFIk0adDDM3xecHIUwROfYjmD7m2fXlJaOkWlTGj9sOBvu0YubDrxZyvtnw+Ic5sopJkUwWHg7RwzF687F9fv9D5lqZrmj7P/xFgAKVl7/UJWVyTAAAAAElFTkSuQmCC';
+                return img;
+            }(),
+            size: [32, 32],
+        },
+        iridiumcore: {
+            pic: function(){
+                let img = new Image();
+                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAA9lBMVEUAAAA/Pzc5KCU2JiM7LSpFPDlVTUpTS0k7Kyg8LSo+MS5SS0hUTEtXT0xHOzlJQT9TS0hWT01TS0s+Lyw3KSY9MCw8Ly1GOTdEODZKPz1GPDtLQj9PRkRTSUdNRkRRSklWTkxUSkplNUQ9LStDNTJCNDFFNzNEODZCOTdPRUJXTUs9LChWQ0BLOjZ7ZmNHNjJCMC1ALys/Lio7KieLdnRkUE1hTUpcSEVSPzxJNzSqmZdrV1NnUk9YREFRPjtOPDhEMy/VzMubiIaTfXuBbGlzXlxAMCzPxcTCtLSunpyplpWkkpCei4mGcW+GcW53Yl92YV9uWlfF/PqMAAAAK3RSTlMAAv7+882MG/376ZGIS9a5MS4Y+vrx69vZzL28op2UU1A0BPnz7OnXzraTj5b2wQAAAO1JREFUGNMdz0Viw0AQRNEWs2XLzBDOzIiZjWG6/2UieflrVQ8AKENTn6ZTndcECtruqR12wDD9YYfvUm0vZZpBiPYQkhfNYqiyhzyrJJbleCNFAK0j2gmJsjzC5EJPNqAOXYKjs++bWZy4rAL6jUMC85C+Hc9R6Upz4GinCk7vr/sPM8S2yAEn2vGv//myT/2/whYfQZdcEv58p4ejmRe1NAOeZWqcmV/mKYgTxK5Ae/CcBId5GODKuozXYPD3jh0XuKyIhe6eBaC6S7l57tYIodFi22B2PX7CDmipfztWtrsrV9goc46brdYt/x9ZciHdNCCpngAAAABJRU5ErkJggg==';
+                return img;
+            }(),
+            size: [16, 16],
         },
         fragmentV1: {
             pic: function(){
@@ -668,7 +700,7 @@ const config = {
                 img.src = 'images/fragment_v1.png';
                 return img;
             }(),
-            size: [24, 16]
+            size: [24, 16],
         },
         fragmentV2: {
             pic: function(){

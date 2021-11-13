@@ -16,6 +16,9 @@ const menu = {
             shipCell: 0,
         }
     },
+    previousElementName: '',            // Имя предыдущего активного элемента (из которого пользователь пришел в текущий). Это свойство используется для возврата в лобби из hangar и gamescreen.
+
+
 
       //////////////////////////////
      ///// DOM-элементы меню  /////
@@ -194,16 +197,7 @@ const menu = {
             this.elements.hangar.ships = document.querySelector('#hangar .ships');
             this.elements.hangar.button = document.querySelector('#hangar button');
             this.elements.hangar.button.addEventListener('click', () => {    // Закрытие модального слоя "ангара" с последующим обновлением состояния конфига для выбранного игрока и набора модов в лобби. (Данный "слушатель" был извлечен из метода shipsSelector, поскольку там он назначался на кнопку с каждым вызовом этого метода, что приводило к суммированию этих слушателей на кнопке и последующему многократному вызову апдейта.)
-                
-                this.show('local');  // Аргумент должен быть переменной, в которой будет писаться блок, откуда ппришли в ангал (это или local или online)
-                
-                /*                 menu.elements.hangar.basis.classList.add('trans_out');
-                setTimeout(() => {
-                    menu.elements.hangar.basis.classList.add('inactive');
-                    menu.elements.hangar.basis.classList.remove('trans_out');
-                }, 500); */
-
-
+                this.show(this.previousElementName);
                 this.update('players', this.playerChoice.hangar.player, 'shipsSelector', Array.from(this.elements.hangar.fleet.children));
             });
         }
@@ -439,16 +433,32 @@ const menu = {
     hangarGenerator: function(){
         let shipsHTML = '';
         for (const key in config.shipMods) {
+            const pC = config.shipMods[key].paramsConst;
+            // Функция расчета процента мощности оружия для шкалы.
+            const calcScale = function(pC, wType){
+                if(config.bulletMods[pC[wType][0]].paramsConst.energyСharge){
+                    return Math.round(config.bulletMods[pC[wType][0]].paramsConst.energyСharge / 1000 * 100);
+                }else{
+                    return Math.round(config.bulletMods[pC[wType][0]].paramsConst.weight * config.bulletMods[pC[wType][0]].paramsConst.speed[0] / 10);
+                }
+            };
+            const chars = {
+                tSpd: Math.round(pC.topSpeed / 10 * 100),
+                mass: Math.round(pC.weight / 1000 * 100),
+                drbt: Math.round(pC.durability / 10 * 100),
+                dWpn: calcScale(pC, 'weapon'),
+                sWpn: calcScale(pC, 'superWeapon'),
+            }
             shipsHTML += this.templates.shipsBox
                 .replace(/{{ boatMod }}/g, config.shipMods[key].model)
                 .replace(/{{ boatPic }}/, config.textures[key] ? config.textures[key].pic.outerHTML : '!!!')
                 .replace(/{{ boatChars }}/, function(){
                     return `
-                        <div><div>Скорость:</div><div class="bar"><div style="width:${Math.round(config.shipMods[key].paramsConst.topSpeed / 10 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.topSpeed} км/с</span></div></div>
-                        <div><div>Масса:</div><div class="bar"><div style="width:${Math.round(config.shipMods[key].paramsConst.weight / 1000 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.weight} тонн</span></div></div>
-                        <div><div>Прочность:</div><div class="bar"><div style="width:${Math.round(config.shipMods[key].paramsConst.durability / 10 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.durability} ед.</span></div></div>
-                        <div><div>Осн.оружие:</div><div class="bar"><div style="width:${Math.round(config.bulletMods[config.shipMods[key].paramsConst.weapon[0]].paramsConst.energyСharge / 1000 * 100)}%">&nbsp;</div><span>${config.shipMods[key].paramsConst.weapon[0]}</div></div>
-                        <div><div>Суп.оружие:</div><div class="bar"><div style="width:0">&nbsp;</div><span>${config.shipMods[key].paramsConst.superWeapon[0]}</span></div></div>
+                        <div><div>Скорость:</div><div class="bar"><div style="width:${chars.tSpd}%">&nbsp;</div><span>${pC.topSpeed} км/с</span></div></div>
+                        <div><div>Масса:</div><div class="bar"><div style="width:${chars.mass}%">&nbsp;</div><span>${pC.weight} тонн</span></div></div>
+                        <div><div>Прочность:</div><div class="bar"><div style="width:${chars.drbt}%">&nbsp;</div><span>${pC.durability} ед.</span></div></div>
+                        <div><div>Осн.оружие:</div><div class="bar"><div style="width:${chars.dWpn}%">&nbsp;</div><span>${pC.weapon[0]}</div></div>
+                        <div><div>Суп.оружие:</div><div class="bar"><div style="width:${chars.sWpn}%">&nbsp;</div><span>${pC.superWeapon[0]}</span></div></div>
                     `;
                 });
         }
@@ -495,15 +505,16 @@ const menu = {
     show: function(blockName, fadeSpeed = 500, callback){
         for (const key in this.elements){
             if(key != blockName && !menu.elements[key].basis.classList.contains('inactive')){              // Поиск активного блока, т.е., который показывается, но не являющийся блоком назначения.
-                menu.elements[key].basis.style = `animation: trans_out ${fadeSpeed / 1000}s ease forwards`;
+                this.previousElementName = key;                                                            // Установка имени блока, который закрывается.
+                this.elements[key].basis.style = `animation: trans_out ${fadeSpeed / 1000}s ease forwards`;
                 setTimeout(() => {
-                    menu.elements[key].basis.classList.add('inactive');
-                    menu.elements[key].basis.style = `animation: none`;
-                    menu.elements[blockName].basis.style = `animation: trans_in ${fadeSpeed / 1000}s ease forwards`;
-                    menu.elements[blockName].basis.classList.remove('inactive');
+                    this.elements[key].basis.classList.add('inactive');
+                    this.elements[key].basis.style = `animation: none`;
+                    this.elements[blockName].basis.style = `animation: trans_in ${fadeSpeed / 1000}s ease forwards`;
+                    this.elements[blockName].basis.classList.remove('inactive');
                     if(callback) callback();
                     setTimeout(() => {
-                        menu.elements[blockName].style = `animation: none`;
+                        this.elements[blockName].style = `animation: none`;
                     }, fadeSpeed);
                 }, fadeSpeed);
             }
@@ -511,6 +522,8 @@ const menu = {
     },
 
 
+// Выяснить че за тормоза в хроме появились только для текущей версии.
+// Начать привязывать звуки к событиям, а также закончить механизм переключения музыки между геймплеем и меню.
 
       ///////////////////////////
      ///// Запуск геймплея /////

@@ -942,6 +942,7 @@ button:active {
     color: #fff;
     transition: all 1.5s ease-in;
 }
+
 #gamescreen .dashboard > div.gameover {
     transform: translateY(250px) rotate(-50deg);
     opacity: 0;
@@ -952,33 +953,43 @@ button:active {
     height: 75px;
     border-radius: 5px;
     border: solid 1px;
-    background: url(../images/player1.png) no-repeat;
+    background-repeat: no-repeat;
     background-size: cover;
 }
+
+#gamescreen .dashboard > div[data-playernum="0"] .avatar {background-image: url(../images/player1.png);}
+#gamescreen .dashboard > div[data-playernum="1"] .avatar {background-image: url(../images/player2.png);}
+#gamescreen .dashboard > div[data-playernum="2"] .avatar {background-image: url(../images/player3.png);}
+#gamescreen .dashboard > div[data-playernum="3"] .avatar {background-image: url(../images/player4.png);}
+
 #gamescreen .dashboard .stat {
     width: calc(100% - 85px);
     margin-left: 10px;
 }
-#gamescreen .dashboard .healt {
+#gamescreen .dashboard .name {
+    font-weight: 400;
+}
+#gamescreen .dashboard .progress {
+    display: flex;
+    justify-content: space-between;
     font-size: 12px;
 }
-#gamescreen .dashboard .healt > div {
+#gamescreen .dashboard .progress > div:last-child {
     display: inline-block;
-    height:10px;
+    height:8px;
     width: 100px;
-    border:solid 1px #fff3;
+    border:solid 1px #fff4;
     background: #0005;
-    margin-top: 8px;
+    margin: 5px 0 0 5px;
 }
-#gamescreen .dashboard .healt > div > div{
-    height: 8px;
+#gamescreen .dashboard .progress > div:last-child > div{
+    height: 6px;
     overflow: hidden;
     transition: width 0.3s ease;
 }
-#gamescreen .dashboard .healt > div > div > div {
-    height: 10px;
+#gamescreen .dashboard .progress > div:last-child > div > div {
+    height: 6px;
     width: 100px;
-    background: linear-gradient(90deg, #f00, #059);
 }
 #gamescreen .dashboard .fleet {
     display: flex;

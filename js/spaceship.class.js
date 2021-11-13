@@ -16,10 +16,13 @@ class spaceShip {
     boundaryIgnore = false;
     activeSprites = {};                                         // Стек имен собственных спрайтов со значениями, например {engine:false}, которые указывают рендеру обрабатывать ли спрайт или игнорировать. False - спрайт неактивен; Number - спрайт активен, значение является текущим номером кадра спрайта. Имена и значения присваиваются при инициализации, а также во время активации метода объекта.
     activeActions = {                                           // Стек имен собственных методов с флагами, которые указывают объекту Вселенной, должны ли методы быть вызваны (в методе quantumSwitch). Данное свойство повторяет некоторые значения св-ва controls, но выведено отдельно, поскольку в дальнейшем могут быть созданы методы не зависящие от управления.
+        motion: false,
         impulse: false,
         rotate: false,
-        strike: false,
-        blink: false
+        shot: false,
+        superShot: false,
+        shotDelay: false,
+        blink: false,
     };
     paramsVariable = {
         vertices: [],                                           // Координаты вершин объекта изменяемые в процессе «жизни» и применяемые для рендеринга слоя этого объекта.
@@ -31,6 +34,11 @@ class spaceShip {
         deg: 0,                                                 // Градус поворота объекта
         health: 100,                                            // Процент целостности от 0 до 100.
     };
+    shotDelayCounter = {                                        // Счетчик интервалов выстрелов для ограничения частоты выстрелов [основное оружие, супероружие].
+        shot: 0,
+        superShot: 0
+    };
+
 
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +89,7 @@ class spaceShip {
         this.blink();                                                                                                       // Запуск индикации возраждения (мерцания).
         this.driver(this.driverType);                                                                                       // Инициализация управления.
         this.activeActions.motion = true;                                                                                   // Запуск дрейфа в пространстве
+        this.activeActions.shotDelay = true;                                                                                // Запуск отслеживания счетчика интервалов выстрелов
     }
 
 
@@ -125,7 +134,8 @@ class spaceShip {
     }
 
 
-      ///////////////////////////////
+
+    ///////////////////////////////
      /////// Метод ускорения ///////
     ///////////////////////////////
     impulse(){
@@ -159,6 +169,7 @@ class spaceShip {
             }
         }
     }
+
 
 
       ////////////////////////////////////////////////////
@@ -203,11 +214,19 @@ class spaceShip {
       ////////////////////////////////
      /////// Функция стрельбы ///////
     ////////////////////////////////
-    strike(){
-        // Создается новый объект пули и добавляется во Вселенную.
+    shot(supershot){
+        const methodName = supershot ? 'superShot' : 'shot'; 
+        const weaponType = supershot ? 'superWeapon' : 'weapon'; 
+        // Проверяется разрешение на стрельбу.
+        if(this.shotDelayCounter[methodName]){
+            this.activeActions[methodName] = false;
+            return;
+        };
+        // Устанавливается счетчик ограничения частоты выстрелов и создается новый объект пули, который добавляется во Вселенную.
+        this.shotDelayCounter[methodName] = this.paramsConst[weaponType][1];
         universe.objects.push(
             new bullet(
-                config.bulletMods[this.paramsConst.weapon[0]],
+                config.bulletMods[this.paramsConst[weaponType][0]],
                 this.id,
                 Object.assign(
                     {},
@@ -216,7 +235,31 @@ class spaceShip {
                 )
             )
         );
-        this.activeActions.strike = false;
+        this.activeActions[methodName] = false;
+    }
+
+
+
+      ///////////////////////////////////////////////
+     /////// Функция стрельбы из супероружия ///////
+    ///////////////////////////////////////////////
+    superShot(){
+        this.shot(true);
+    }
+
+
+
+      /////////////////////////////////////////////////////////////////
+     /////// Счетчик квантов для ограничения частоты выстрелов ///////
+    /////////////////////////////////////////////////////////////////
+    shotDelay(){
+        if(this.shotDelayCounter.shot) this.shotDelayCounter.shot--;
+        if(this.shotDelayCounter.superShot){
+            this.shotDelayCounter.superShot--;
+            if(universe.quantCounter % 15 && this.shotDelayCounter.superShot > 1) return;
+            dashboard.update(this.playerIndex, 'energy', Math.round((this.paramsConst.superWeapon[1] - this.shotDelayCounter.superShot) * 100 / this.paramsConst.superWeapon[1]));
+        }
+
     }
 
 

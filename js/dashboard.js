@@ -9,14 +9,22 @@ const dashboard = {
     templates: {
         player: `
             <div data-playernum="{{ playerNum }}">
-                <div class="avatar"></div>
+                <div class="avatar" style="border-color:{{ playerColor }}; box-shadow: 0 0 5px {{ playerColor }} inset"></div>
                 <div class="stat">
                     <div class="name">{{ captain }}</div>
-                    <div class="healt">
-                        Healt
+                    <div class="progress healt">
+                        <div>Healt</div>
                         <div>
                             <div style="width:{{ healt }}%">
-                                <div style="background:linear-gradient(90deg, #f00, {{ playerColor }})">&nbsp;</div>
+                                <div style="background: linear-gradient(90deg, #f00 10%, #f90 40%, #090 100%);">&nbsp;</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress energy">
+                        <div>Energy</div>
+                        <div>
+                            <div style="width:{{ energy }}%; background: #059;">
+                                &nbsp;
                             </div>
                         </div>
                     </div> 
@@ -48,17 +56,17 @@ const dashboard = {
 
 
     init: function(){
-        this.elements.players = [],
-        this.elements.playersHealt = [],
+        this.elements.players = [];
+        this.elements.playersHealt = [];
+        this.elements.playersEnergy = [];
         this.elements.playersFleet = [];
-        this.builder();
+        this.builder();  // Генерурется блоки пользователей, а затем выбераются из него элементы.
         this.elements.players = this.elements.basis.querySelectorAll('div[data-playernum]');
         this.elements.players.forEach((element, key) => {
             this.elements.playersHealt[key] = element.querySelector('.healt > div > div');
+            this.elements.playersEnergy[key] = element.querySelector('.energy > div > div');
             this.elements.playersFleet[key] = element.querySelector('.fleet');
         });
-
-
     },
 
 
@@ -70,6 +78,7 @@ const dashboard = {
                             .replace(/{{ playerNum }}/g, player.playerIndex)
                             .replace(/{{ captain }}/g, player.captain)
                             .replace(/{{ healt }}/g, 100)
+                            .replace(/{{ energy }}/g, 100)
                             .replace(/{{ playerColor }}/g, player.color)
                             .replace(/{{ fleet }}/g, function(){
                                 let shipsList = '';
@@ -84,14 +93,12 @@ const dashboard = {
     },
 
 
-    update: async function(playerIndex, type, value){
+    update: function(playerIndex, type, value){
         switch(type){
             case 'shipdamage':
                 this.elements.playersHealt[playerIndex].style.width = value < 0 ? 0 : value+'%';
-                console.log('=======> Учет урона ('+value+') для игрока '+playerIndex);
                 break;
             case 'shipdestroy':
-                console.log('=======> Списание судна для игрока '+playerIndex);
                 this.elements.playersFleet[playerIndex].children[0].classList.add('destroyed');
                 setTimeout(() => {
                     this.elements.playersFleet[playerIndex].children[0].remove();
@@ -102,12 +109,12 @@ const dashboard = {
                 break;
             case 'gameover':
                 this.elements.players[playerIndex].classList.add('gameover');
-                console.log('=======> Игра окончена для игрока '+playerIndex);
                 break;
-
+            case 'energy':
+                this.elements.playersEnergy[playerIndex].style.width = value + '%';
+                break;
         }
     },
-
 
 
     showWinner: function(hide){
