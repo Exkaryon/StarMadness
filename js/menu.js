@@ -504,17 +504,17 @@ const menu = {
     ////////////////////////////////////////////////////////////
     show: function(blockName, fadeSpeed = 500, callback){
         for (const key in this.elements){
-            if(key != blockName && !menu.elements[key].basis.classList.contains('inactive')){              // Поиск активного блока, т.е., который показывается, но не являющийся блоком назначения.
-                this.previousElementName = key;                                                            // Установка имени блока, который закрывается.
+            if(key != blockName && !menu.elements[key].basis.classList.contains('inactive')){               // Поиск активного блока, т.е., который показывается, но не являющийся блоком назначения.
+                this.previousElementName = key;                                                             // Установка имени блока, который закрывается.
                 this.elements[key].basis.style = `animation: trans_out ${fadeSpeed / 1000}s ease forwards`;
                 setTimeout(() => {
                     this.elements[key].basis.classList.add('inactive');
-                    this.elements[key].basis.style = `animation: none`;
+                    this.elements[key].basis.removeAttribute('style');
                     this.elements[blockName].basis.style = `animation: trans_in ${fadeSpeed / 1000}s ease forwards`;
                     this.elements[blockName].basis.classList.remove('inactive');
                     if(callback) callback();
                     setTimeout(() => {
-                        this.elements[blockName].style = `animation: none`;
+                        this.elements[blockName].basis.removeAttribute('style');                            // Свойство animation удаляется. Это также необходимо для chrome с отключенным аппартаным ускорением, поскольку оставшееся свойство (в частности для блока #gamescreen) провоцирует торможение в canvas и снижение FPS в анимации.
                     }, fadeSpeed);
                 }, fadeSpeed);
             }
