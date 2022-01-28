@@ -291,4 +291,3 @@ const mediaLibrary = {
 
 
 mediaLibrary.init();
-dev.init();

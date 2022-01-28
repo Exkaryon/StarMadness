@@ -1509,149 +1509,149 @@ const config = {
             /* Musics */
             alienInvasion: {
                 type: 'introMusic',
-                url:'/v_1.0_dev/media/alien_invasion.mp3',
+                url:'media/alien_invasion.mp3',
             },
             tomorrowIsToday: {
                 type: 'menuMusic',
-                url:'/v_1.0_dev/media/tomorow_is_today.mp3',
+                url:'media/tomorow_is_today.mp3',
             },
             alienInvasionAlt: {
                 type: 'menuMusic',
-                url:'/v_1.0_dev/media/alien_invasion_alt.mp3',
+                url:'media/alien_invasion_alt.mp3',
             },
             kineticStrike: {
                 type: 'gameMusic',
-                url:'/v_1.0_dev/media/kinetic_strike.mp3',
+                url:'media/kinetic_strike.mp3',
             },
             epicArrival: {
                 type: 'gameMusic',
-                url:'/v_1.0_dev/media/epic_arrival.mp3',
+                url:'media/epic_arrival.mp3',
             },
             singularity: {
                 type: 'gameMusic',
-                url:'/v_1.0_dev/media/singularity.mp3',
+                url:'media/singularity.mp3',
             },
 
             /* Weapons */
             plasma: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/plasma_gun.mp3',
+                url:'media/plasma_gun.mp3',
             },
             redplasma: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/red_plasma.mp3',
+                url:'media/red_plasma.mp3',
             },
             pellet: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/pellet.mp3',
+                url:'media/pellet.mp3',
             },
             toxicball: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/toxicball.mp3',
+                url:'media/toxicball.mp3',
             },
             iridiumcore: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/iridiumcore.mp3',
+                url:'media/iridiumcore.mp3',
             },
             laser: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/laser.mp3',
+                url:'media/laser.mp3',
             },
             fireball: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/fireball.mp3',
+                url:'media/fireball.mp3',
             },
             biocapsule: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/biocapsule.mp3',
+                url:'media/biocapsule.mp3',
             },
 
             /* Collisions */
             shipToShip: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/ship_to_ship.mp3',
+                url:'media/ship_to_ship.mp3',
             },
             shipToAsteroid: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/ship_to_asteroid.mp3',
+                url:'media/ship_to_asteroid.mp3',
             },
             shipToMetal: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/ship_to_metal.mp3',
+                url:'media/ship_to_metal.mp3',
             },
             shipToStone: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/ship_to_stone.mp3',
+                url:'media/ship_to_stone.mp3',
             },
             shipToFragment: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/ship_to_fragment.mp3',
+                url:'media/ship_to_fragment.mp3',
             },
             asteroidToAsteroid: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/asteroid_to_asteroid.mp3',
+                url:'media/asteroid_to_asteroid.mp3',
             },
             stoneToAsteroid: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/stone_to_asteroid.mp3',
+                url:'media/stone_to_asteroid.mp3',
             },
             stoneToStone: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/stone_to_stone.mp3',
+                url:'media/stone_to_stone.mp3',
             },
             fragmentToFragment : {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/fragment_to_fragment.mp3',
+                url:'media/fragment_to_fragment.mp3',
             },
 
             /* Effects */
             fireExplosion: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/fire_explosion.mp3',
+                url:'media/fire_explosion.mp3',
             },
             asteroidFragmentation: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/asteroid_fragmentation.mp3',
+                url:'media/asteroid_fragmentation.mp3',
             },
             sparkBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/spark_bang.mp3',
+                url:'media/spark_bang.mp3',
             },
             blackBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/black_bang.mp3',
+                url:'media/black_bang.mp3',
             },
             fireballBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/fireball_bang.mp3',
+                url:'media/fireball_bang.mp3',
             },
             bloodBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/blood_bang.mp3',
+                url:'media/blood_bang.mp3',
             },
             toxicBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/toxic_bang.mp3',
+                url:'media/toxic_bang.mp3',
             },
             stoneBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/stone_bang.mp3',
+                url:'media/stone_bang.mp3',
             },
             miniBang: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/mini_bang.mp3',
+                url:'media/mini_bang.mp3',
             },
 
             /* soundLoops*/
             engine: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/engine.mp3',
+                url:'media/engine.mp3',
             },
 
             /* Other */
             gameOver: {
                 type: 'gameSound',
-                url:'/v_1.0_dev/media/game_over.mp3',
+                url:'media/game_over.mp3',
             },
 
         },
