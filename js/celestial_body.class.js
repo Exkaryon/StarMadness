@@ -20,8 +20,8 @@ class celestialBody {
         vertices: [],                                           // Координаты вершин объекта изменяемые в процессе «жизни» и применяемые для рендеринга слоя этого объекта.
         fulcrum: [0,0],                                         // Координаты опорной точки объекта (условный центр объекта). Если не установлено умолчание отличное от нуля, расчитывается при инициализации по вершинам. 
         interactionFieldSize: 0,                                // Размер поля взаимодействия объекта (зона, при соприкосновении с которой иного объекта, начинается детальные вычисления столкновений). Расчитывается при инициализации по вершинам.
-        fullFieldSize: 0,                                       // Размер поля (всего холста объекта), включая неактивную зону - место в котором могут отрисовываться спрайты или иные элементы так, чтобы они полностью вписались в это поле.
-        currentSpeed:[0,0],                                     // Текущая скорость X,Y
+        fullFieldSize: [0, 0],                                  // Размер поля (всего холста объекта), включая неактивную зону - место в котором могут отрисовываться спрайты или иные элементы так, чтобы они полностью вписались в это поле.
+        currentSpeed: [0, 0],                                   // Текущая скорость X,Y
         location: [0,0],                                        // Текущее положение в пространстве X,Y
         deg: 0,                                                 // Градус поворота объекта
         health: 100,                                            // Процент целостности от 0 до 100.
@@ -34,7 +34,7 @@ class celestialBody {
         const bodyTypes = {                                                                                                         // Набор типов небесных тел и их коллекции моделей.
             asteroids: ['asteroidStone', 'asteroidBrown', 'asteroidSteel', 'asteroidBlack'],
             stones: ['stoneV1', 'stoneV2', 'stoneV3', 'stoneV4'],
-            debris: ['fragmentV1', 'fragmentV2', 'fragmentV3', 'fragmentV4', 'fragmentV5', 'fragmentV6'],
+            fragments: ['fragmentV1', 'fragmentV2', 'fragmentV3', 'fragmentV4', 'fragmentV5', 'fragmentV6'],
         };
         Object.assign(this, config.celestialBodyMods[bodyTypes[bodyType][library.randomizer(1, bodyTypes[bodyType].length) - 1]]);  // Копирование статичных свойств из конфига соответсвенно случайно выбранному моду из набора.
 
@@ -43,7 +43,7 @@ class celestialBody {
             this.paramsVariable.location = [parentParams.location[0], parentParams.location[1]];
             this.activeActions.ignoringPI = true;
         }else{
-            this.paramsVariable.location = library.respawnPos(this, universe.objects);                                              // Стартовая позиция в пространстве.
+            this.paramsVariable.location = library.respawnPos(this, universe.objects, bodyType == 'asteroids');                                     // Стартовая позиция в пространстве.
         }
         this.init();
     }
@@ -76,7 +76,7 @@ class celestialBody {
             }
         }
         this.paramsVariable.fullFieldSize = library.getFullFieldSize(this);                                                 // Размер области, которую будет занимать объект, включая все его графические элементы.
-        this.paramsVariable.currentSpeed = library.respawnSpeed(this);                                                      // Стартовая скорость при рождении/возраждении.
+        this.paramsVariable.currentSpeed = library.respawnSpeed(this);                                                      // Стартовая скорость при рождении.
         this.activeActions.motion = true;
 
         this.paramsVariable.deg = library.randomizer(0, 360);                                                               // Стартовый угол поворота объекта.
@@ -124,7 +124,7 @@ class celestialBody {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ignoringPI (){
         if(!this.activeActions.ignoringPI) return;
-        if(!this.ignorePITimer){                                                    // Если таймер индикации не установлен, устанавливается он и флаг индикации. 
+        if(!this.ignorePITimer){                                                    // Если таймер игнорирования не установлен.
             this.ignorePITimer = 180;                                               // Время игнорирования физического воздействия в квантах. Пример: пока небесные тела не успели разлететься подальше друг от друга (осколки после разбития большого астероидла), нужно отключать физическое воздействие, чтобы они не уничтожились друг об друга.
             this.ignoreModels = ['stoneV1', 'stoneV2', 'stoneV3', 'stoneV4', 'fragmentV1', 'fragmentV2', 'fragmentV3', 'fragmentV4', 'fragmentV5', 'fragmentV6'];       // Модели объектов, которые следует игнорировать, то есть в данном случае, созданный камень игнорирует объекты перечисленных моделей.
 

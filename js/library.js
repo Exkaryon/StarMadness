@@ -26,6 +26,30 @@ const library = {
 
 
 
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ///// Получение миниимальных и максимальных значений (крайних точек) по X и Y интерактивной области объекта. /////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    getMinMaxInteractionField: function(obj){
+        let size = {min: [1000, 1000], max: [-1000, -1000]};
+        switch (obj.paramsConst.formType){
+            case 'polygon':                                     // Если тип объекта полигональный (на основе вершин).
+                obj.paramsVariable.vertices.forEach(vrtx => {   // Нахождение максимальных и минимальных значений вершин.
+                    if(vrtx[0] < size.min[0]) size.min[0] = vrtx[0];      // X min
+                    if(vrtx[0] > size.max[0]) size.max[0] = vrtx[0];      // X max
+                    if(vrtx[1] < size.min[1]) size.min[1] = vrtx[1];      // Y min
+                    if(vrtx[1] > size.max[1]) size.max[1] = vrtx[1];      // Y max
+                });
+                break;
+            case 'circle':                                      // Если тип объекта окружность.
+                size.min = [-obj.paramsConst.radius, -obj.paramsConst.radius];
+                size.max = [obj.paramsConst.radius, obj.paramsConst.radius];
+                break; 
+        }
+        return size;
+    },
+
+
+
       ///////////////////////////////////////////////////////////////////////////////////////////
      ///// Метод расчета опорной точки объекта (центра объекта) Вселенной по его вершинам. /////
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -79,43 +103,64 @@ const library = {
             });
         }
         let maxSize = Math.max(...sizes);  // Эквивалентно старому выражению: Math.max.apply(null, sizes); 
-        return maxSize > (obj.paramsVariable.interactionFieldSize || 0) ? maxSize : obj.paramsVariable.interactionFieldSize;
+        return maxSize > (obj.paramsVariable.interactionFieldSize || 0) ? [maxSize, maxSize] : [obj.paramsVariable.interactionFieldSize, obj.paramsVariable.interactionFieldSize];
     },
 
 
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////
      ///// Определение позиции рождения/возрождения с учетом позиции и размеров других объектов. /////
     /////////////////////////////////////////////////////////////////////////////////////////////////
-    respawnPos: function(protoObj, uniObjs){
+    respawnPos: function(protoObj, uniObjs, outside){
         let attempts = 10;                       // Число попыток, после исчерпания которых, объект будет размещен уж как получится. Исчерпание попыток означает возможное остутсвие свободного места в пространстве для возрождения.
         let location;
         function coordsGenerator(){
-            let preLoc = [
-                library.randomizer(protoObj.paramsVariable.interactionFieldSize, universe.spaceSize[0] - protoObj.paramsVariable.interactionFieldSize),
-                library.randomizer(protoObj.paramsVariable.interactionFieldSize, universe.spaceSize[1] - protoObj.paramsVariable.interactionFieldSize)
-            ];
+            let preLoc = (() => {
+                if(outside){
+                    // Координаты появления вне игрового поля.
+                    const size = this.getMinMaxInteractionField(protoObj);
+                    const semiaxis = {
+                        x: (Math.abs(size.min[0]) + size.max[0]) / 2,
+                        y: (Math.abs(size.min[1]) + size.max[1]) / 2,
+                    };
+                    const outsideAxes = {
+                        x: [-semiaxis.x, universe.spaceSize[0] + semiaxis.x],
+                        y: [-semiaxis.y, universe.spaceSize[1] + semiaxis.y],
+                    };
+                    const sideVars = [
+                        [outsideAxes.x[this.randomizer(0, 1)], this.randomizer(protoObj.paramsVariable.interactionFieldSize, universe.spaceSize[1] - protoObj.paramsVariable.interactionFieldSize)],
+                        [this.randomizer(protoObj.paramsVariable.interactionFieldSize, universe.spaceSize[0] - protoObj.paramsVariable.interactionFieldSize), outsideAxes.y[this.randomizer(0, 1)]]
+                    ];
+                    return sideVars[this.randomizer(0, 1)];
+                }else{
+                    // Координаты появления внутри игрового поля.
+                    return [
+                        this.randomizer(protoObj.paramsVariable.interactionFieldSize, universe.spaceSize[0] - protoObj.paramsVariable.interactionFieldSize),
+                        this.randomizer(protoObj.paramsVariable.interactionFieldSize, universe.spaceSize[1] - protoObj.paramsVariable.interactionFieldSize)
+                    ];
+                }
+            })();
 
             if(Object.keys(uniObjs).length){
                 let overlay = uniObjs.find(realObj => {         // Детектирование наложения протообъекта на другие объекты Вселенной.
                                    if(realObj != undefined){    // В uniObjs могут присутсвовать пустые индексы удаленных объектов, поэтому осуществляется проверка,чтобы избежать ошибки обращения к несуществующим св-вам.
                                         let rSum = (protoObj.paramsVariable.interactionFieldSize + realObj.paramsVariable.interactionFieldSize) / 2 + 10;
-                                        if(rSum > library.getLengthFromVertices(preLoc[0], preLoc[1], realObj.paramsVariable.location[0], realObj.paramsVariable.location[1])){
+                                        if(rSum > this.getLengthFromVertices(preLoc[0], preLoc[1], realObj.paramsVariable.location[0], realObj.paramsVariable.location[1])){
                                             return true;
                                         }
                                    }
                                });
                 if(overlay && attempts > 0){
                     attempts--;
-                    coordsGenerator();
+                    coordsGenerator.call(this);
                 }else{
                     location = preLoc;
-                }    
+                }
             }else{
                 location = preLoc;
             }
         }
-        coordsGenerator();
+        coordsGenerator.call(this);
         return location;
     },
 
@@ -147,10 +192,9 @@ const library = {
      ///// Расчет направления импульса управляемых объектов в зависимости от угла поворота /////
     ///////////////////////////////////////////////////////////////////////////////////////////
     getImpulseVector:function(deg){
-        //DEBUG_INFO('win_2', [Math.sin(deg * Math.PI / 180).toFixed(1), Math.cos(deg * Math.PI / 180).toFixed(1)], '#f90', '');
-        return [                                            // Возвращаемые значения от 0 до 1. Значения являются инкрементом для свойств скорости по соответсвующим осям.
-            Math.sin(deg * Math.PI / 180).toFixed(2),       // X
-            Math.cos(deg * Math.PI / 180).toFixed(2)        // Y
+         return [                                            // Возвращаемые значения от 0 до 1. Значения являются инкрементом для свойств скорости по соответсвующим осям. Точность дробной части должна быть не меньше десятитысячных .toFixed(4), поскольку в противном случае нек. объекты могут неточно позиционироваться (например, bullet модель laser).
+            Math.sin(deg * Math.PI / 180).toFixed(5),       // X
+            Math.cos(deg * Math.PI / 180).toFixed(5)        // Y
         ];
     },
 
@@ -225,8 +269,28 @@ const library = {
     /////////////////////////////////////////
     textureMapping:function(context, obj){
         context.save();
-        context.translate(Math.ceil(obj.paramsVariable.fullFieldSize / 2), Math.ceil(obj.paramsVariable.fullFieldSize / 2));
+        context.translate(Math.ceil(obj.paramsVariable.fullFieldSize[0] / 2), Math.ceil(obj.paramsVariable.fullFieldSize[1] / 2));
         context.rotate(obj.paramsVariable.deg * Math.PI / 180);
+
+        // Подкрашивание пользовательских объектов маской соответсвующим пользователю цветом.
+        if(obj.paramsConst.texture.mask && obj.playerIndex != undefined){
+            context.drawImage(
+                obj.paramsConst.texture.mask,
+                obj.paramsConst.texture.size[0] / -2,
+                obj.paramsConst.texture.size[1] / -2,
+                obj.paramsConst.texture.size[0],
+                obj.paramsConst.texture.size[1],
+            );
+            context.globalCompositeOperation = "source-in";
+            context.fillStyle = obj.color;
+            context.fillRect(
+                obj.paramsConst.texture.size[0] / -2,
+                obj.paramsConst.texture.size[1] / -2,
+                obj.paramsConst.texture.size[0],
+                obj.paramsConst.texture.size[1]
+            );
+            context.globalCompositeOperation = "source-over";
+        }
         context.drawImage(
             obj.paramsConst.texture.pic,
             obj.paramsConst.texture.size[0] / -2,
@@ -247,7 +311,7 @@ const library = {
             if(frameCount === false || !obj.paramsConst.sprites[spriteName]) continue;                  // Если для спрайта установлено булево отрицание, а не число, т.е. счет кадров, или если спрайт с указанным именем не существует у объекта, операция прорисовки прерывается.
             if(obj.activeSprites[spriteName] <= obj.paramsConst.sprites[spriteName].frames){            // Прорисовка кадров спрайтов, если счетчик кадров не превышает их кол-во. 
                 context.save();
-                context.translate(Math.ceil(obj.paramsVariable.fullFieldSize / 2), Math.ceil(obj.paramsVariable.fullFieldSize / 2));
+                context.translate(Math.ceil(obj.paramsVariable.fullFieldSize[0] / 2), Math.ceil(obj.paramsVariable.fullFieldSize[1] / 2));
                 context.rotate(obj.paramsVariable.deg * Math.PI / 180);
                 context.drawImage(
                     obj.paramsConst.sprites[spriteName].pic,
@@ -272,46 +336,29 @@ const library = {
     ///////////////////////////////////////////////////////////////////////////////////////////
     boundaryLaw: function(obj , behavior){
         if(obj.boundaryIgnore) return;                          // Если у объекта существует истинное свойство игнорирования границ, вычислений не происходит.
-        let min, max;
-        switch (obj.paramsConst.formType){
-            case 'polygon':                                     // Если тип объекта полигональный (на основе вершин).
-                min = [ 1000,  1000];                           // [X, Y]
-                max = [-1000, -1000];
-                obj.paramsVariable.vertices.forEach(vrtx => {   // Нахождение максимальных и минимальных значений вершин.
-                    if(vrtx[0] < min[0]) min[0] = vrtx[0];      // X min
-                    if(vrtx[0] > max[0]) max[0] = vrtx[0];      // X max
-                    if(vrtx[1] < min[1]) min[1] = vrtx[1];      // Y min
-                    if(vrtx[1] > max[1]) max[1] = vrtx[1];      // Y max
-                });
-                break;
-            case 'circle':                                      // Если тип объекта окружность.
-                min = [-obj.paramsConst.radius, -obj.paramsConst.radius];
-                max = [obj.paramsConst.radius, obj.paramsConst.radius];
-                break; 
-        }
-
+        const size = this.getMinMaxInteractionField(obj);
         switch (behavior){
             case 'teleport':            // Переход границ объектом учитывается по достижению его максимальными и минимальными вершинами этих границ.
                 // Расчет положения объекта при телепортации при достижении границ разных сторон.
-                if      (obj.paramsVariable.location[0] + max[0] < 0)                      obj.paramsVariable.location[0] += (universe.spaceSize[0] + max[0] + min[0] * -1);
-                else if (obj.paramsVariable.location[1] + max[1] < 0)                      obj.paramsVariable.location[1] += (universe.spaceSize[1] + max[1] + min[1] * -1);
-                else if (obj.paramsVariable.location[0] + min[0] > universe.spaceSize[0])  obj.paramsVariable.location[0] -= (universe.spaceSize[0] + max[0] + min[0] * -1);
-                else if (obj.paramsVariable.location[1] + min[1] > universe.spaceSize[1])  obj.paramsVariable.location[1] -= (universe.spaceSize[1] + max[1] + min[1] * -1);
+                if      (obj.paramsVariable.location[0] + size.max[0] < 0)                      obj.paramsVariable.location[0] += (universe.spaceSize[0] + size.max[0] + size.min[0] * -1);
+                else if (obj.paramsVariable.location[1] + size.max[1] < 0)                      obj.paramsVariable.location[1] += (universe.spaceSize[1] + size.max[1] + size.min[1] * -1);
+                else if (obj.paramsVariable.location[0] + size.min[0] > universe.spaceSize[0])  obj.paramsVariable.location[0] -= (universe.spaceSize[0] + size.max[0] + size.min[0] * -1);
+                else if (obj.paramsVariable.location[1] + size.min[1] > universe.spaceSize[1])  obj.paramsVariable.location[1] -= (universe.spaceSize[1] + size.max[1] + size.min[1] * -1);
                 break;
             case 'rebound':              // Поведение объектов с отскоком от границ.
                 // Расчет параметров скорости и направления отскока объекта при достижении границ.
                 let loc = obj.paramsVariable.location;
                 let cS = obj.paramsVariable.currentSpeed;
-                if      (loc[0] + min[0] < 0)                      cS[0] = Math.abs(cS[0]);
-                else if (loc[1] + min[1] < 0)                      cS[1] = Math.abs(cS[1]);
-                else if (loc[0] + max[0] > universe.spaceSize[0])  cS[0] = Math.abs(cS[0]) * -1;
-                else if (loc[1] + max[1] > universe.spaceSize[1])  cS[1] = Math.abs(cS[1]) * -1;
+                if      (loc[0] + size.min[0] < 0)                      cS[0] = Math.abs(cS[0]);
+                else if (loc[1] + size.min[1] < 0)                      cS[1] = Math.abs(cS[1]);
+                else if (loc[0] + size.max[0] > universe.spaceSize[0])  cS[0] = Math.abs(cS[0]) * -1;
+                else if (loc[1] + size.max[1] > universe.spaceSize[1])  cS[1] = Math.abs(cS[1]) * -1;
                 // Если для объекта установлено отражение поворота при достижении границы, выполняются дополнительные процедуры. 
                 if(obj.paramsConst.reflection){ 
-                    if     (obj.paramsVariable.lastBound != 'W' && loc[0] + min[0] < 0)                     {obj.paramsVariable.deg = 360 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'W';}    // obj.paramsVariable.lastBound — Для объектов сложной формы требуется предовтратить многократное отражение от одной и той же границы. Для этого создаются флаги, запоминающие последнюю достигшую границу (Запад, Север, Восток, Юг).
-                    else if(obj.paramsVariable.lastBound != 'N' && loc[1] + min[1] < 0)                     {obj.paramsVariable.deg = 540 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'N';}
-                    else if(obj.paramsVariable.lastBound != 'E' && loc[0] + max[0] > universe.spaceSize[0]) {obj.paramsVariable.deg = 360 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'E';}
-                    else if(obj.paramsVariable.lastBound != 'S' && loc[1] + max[1] > universe.spaceSize[1]) {obj.paramsVariable.deg = 540 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'S';}
+                    if     (obj.paramsVariable.lastBound != 'W' && loc[0] + size.min[0] < 0)                     {obj.paramsVariable.deg = 360 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'W';}    // obj.paramsVariable.lastBound — Для объектов сложной формы требуется предовтратить многократное отражение от одной и той же границы. Для этого создаются флаги, запоминающие последнюю достигшую границу (Запад, Север, Восток, Юг).
+                    else if(obj.paramsVariable.lastBound != 'N' && loc[1] + size.min[1] < 0)                     {obj.paramsVariable.deg = 540 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'N';}
+                    else if(obj.paramsVariable.lastBound != 'E' && loc[0] + size.max[0] > universe.spaceSize[0]) {obj.paramsVariable.deg = 360 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'E';}
+                    else if(obj.paramsVariable.lastBound != 'S' && loc[1] + size.max[1] > universe.spaceSize[1]) {obj.paramsVariable.deg = 540 - obj.paramsVariable.deg; obj.rotate(); obj.paramsVariable.lastBound = 'S';}
                 }
                 break;
         }
@@ -354,48 +401,46 @@ const library = {
 
 
 
-      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-     ///// Функция детектирования столкновения объектов попарно (детализированное выявление столкновений). Возвращает массив пар индексов universe.objects столкнувшихся объектов. /////
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    getCollidedPairs: function(interactPairs, uniObjs){
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ///// Функция детектирования столкновения объектов попарно (детализированное выявление столкновений). Возвращает массив пар индексов universe.objects столкнувшихся объектов и координаты точки пересечения поверхностей, если они определены. /////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    getCollidedPairs: function(objPairIndexes, objHeap){
         let collidedPairs = [];
-
-        interactPairs.forEach(pair => {
-            switch(uniObjs[pair[0]].paramsConst.formType +'-'+ uniObjs[pair[1]].paramsConst.formType){
-
+        objPairIndexes.forEach(pair => {
+            switch(objHeap[pair[0]].paramsConst.formType +'-'+ objHeap[pair[1]].paramsConst.formType){
                 case 'polygon-polygon':
                     let objPair = [];                                                           // Собираемая пара объектов и их параметров.
                     pair.forEach(key => {                                                       // Сбор необходимых для вычисления параметров для каждого объекта из пары.
                         objPair.push({
                             key: key,                                                           // Индекс объекта в стеке объектов Вселенной (universe.objects)
-                            loc: uniObjs[key].paramsVariable.location,                          // Координаты положения центра объекта во Вселенной.
+                            loc: objHeap[key].paramsVariable.location,                          // Координаты положения центра объекта во Вселенной.
                             edges: function(vertices){                                          // Стек граней объекта (пары вершин), которые понадобяться далее для выявления пересечений.
                                 let t = [];
                                 for(let i = 0; i < vertices.length; i++){
                                     t.push([vertices[i], vertices[(i + 1 >= vertices.length) ? 0 : i + 1]]);
                                 }
                                 return t;
-                            }(uniObjs[key].paramsVariable.vertices)
+                            }(objHeap[key].paramsVariable.vertices)
                         });
                     });
-                    if(this.checkCrossEdges(objPair)){
-                        collidedPairs.push([pair[0], pair[1]]);
-                    }
+                    
+                    const crossData = this.checkCrossEdges(objPair);
+                    if(crossData) collidedPairs.push([pair[0], pair[1], crossData]);
                     break;
 
                 case 'circle-circle':
-                    collidedPairs.push([pair[0], pair[1]]);
+                    collidedPairs.push([pair[0], pair[1], false]);
                     break;
 
                 case 'circle-polygon':
                 case 'polygon-circle':
                     const oPair = {};
                     pair.forEach(index => {
-                        oPair[uniObjs[index].paramsConst.formType] = uniObjs[index];
+                        oPair[objHeap[index].paramsConst.formType] = objHeap[index];
                     });
                     // Проверка пары на пересечение их поверхностей.
                     if(this.checkCrossSurfaces(oPair['polygon'], oPair['circle'])){
-                        collidedPairs.push([pair[0], pair[1]]);
+                        collidedPairs.push([pair[0], pair[1], false]);
                     }
                     break;
             }
@@ -406,12 +451,13 @@ const library = {
 
 
 
-      /////////////////////////////////////////////////////////////////////////////////////////////////////////
-     ///// Функция детектирования пересечения граней пар полигональных объектов (возвращает true/false). /////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ///// Функция детектирования пересечения граней пар полигональных объектов (возвращает координаты точки пересечения граней или false, если пересечений нет). /////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     checkCrossEdges: function(objPair){
+        let crsCoord = [];
         // Перебор граней обоих объектов и их рассмотрение на предмет пересечения.
-        return objPair[0].edges.find(edgeO1 => {
+        objPair[0].edges.find(edgeO1 => {
             return objPair[1].edges.find(edgeO2 => {
                 // Вершины граней (AB и CD) от первого и второго объекта.
                 let Ax = Math.round(edgeO1[0][0] + objPair[0].loc[0]),                       // Значения с плавающей точкой могут внести незначительные флуктуации, которые повлияют на корректность сравнения непараллельных отрезков, поэтому следует округлить значения, жертвуя точностью и прибегая к погрешности в один пиксель.
@@ -454,10 +500,14 @@ const library = {
                     let CDx_cross = (Cx >= x && x >=  Dx) || (Cx <= x && x <= Dx);
                     let ABy_cross = (Ay >= y && y >=  By) || (Ay <= y && y <= By);
                     let CDy_cross = (Cy >= y && y >=  Dy) || (Cy <= y && y <= Dy);
-                    if(ABx_cross && CDx_cross && ABy_cross && CDy_cross) return true;                    // Проверка, лежит ли точка на отрезках (гранях)
+                    if(ABx_cross && CDx_cross && ABy_cross && CDy_cross){                                // Проверка, лежит ли точка на отрезках (гранях).
+                        crsCoord.push([x, y]);
+                        return true;
+                    }
                 }
             });
         });
+        return (crsCoord.length) ? crsCoord : false;
     },
 
 
@@ -481,7 +531,6 @@ const library = {
             return t;
         }(polygon.paramsVariable.vertices, circle.paramsVariable.location);
         triangles.sort((a, b) => a.diff - b.diff);                                                              // Сортировка треугольников для последующего отбора треугольника с самой малой разницей суммы сторон и основания, как первый претиндент на столкновение.
-
         const degC = 180 - Math.acos((Math.pow(triangles[0].A,2) + Math.pow(triangles[0].B, 2) - Math.pow(triangles[0].C, 2)) / (2*triangles[0].A*triangles[0].B)) * 180 / Math.PI; // Вычисление угла противолежащего основанию по формуле: aCos(A²+B²-C²)/(2AB)); требуется для определения расстояния центра окружности до основания, когда высота треугольника выходит за рамки оного (в этом случае высота оказывается некорректной (меньше чем реальное расстояние центра от грани). 
         const h = function(){
             if(degC > 90){
@@ -516,7 +565,7 @@ const library = {
     kineticReflexion: function(pair, uniObjs){
         // Сборка параметров, необходимых для вычислений.
         let objs = [];
-        pair.forEach(index => {
+        [pair[0], pair[1]].forEach(index => {
             objs.push({
                 indx:     index,  
                 loc:      uniObjs[index].paramsVariable.location,
@@ -548,7 +597,7 @@ const library = {
                 // Расчет полного угла направления векторов (theta)
                 triangle.angleX = triangle.c != 0 ? Math.abs(Math.asin(triangle.x / triangle.c) * 180 / Math.PI) : 0;
                 triangle.angleY = triangle.c != 0 ? Math.abs(Math.asin(triangle.y / triangle.c) * 180 / Math.PI) : 0;
-                switch(Math.sign(triangle.x || 1) + '' + Math.sign(triangle.y || 1)){    // Принять 0 за положительное число, что эквивалентно условию: ... || 1. Здесь, с помощью знаков значений X и Y, определяется четверть круга, к которому принадлежить вектор. 
+                switch(Math.sign(triangle.x || 1) + '' + Math.sign(triangle.y || 1)){    // Принять 0 за положительное число, что эквивалентно условию: ... || 1. Здесь, с помощью знаков значений X и Y, определяется четверть круга, к которому принадлежит вектор. 
                     case '1-1':  triangle.theta = 0   + triangle.angleX; break;
                     case '11':   triangle.theta = 90  + triangle.angleY; break;
                     case '-11':  triangle.theta = 180 + triangle.angleX; break;
@@ -642,7 +691,8 @@ const library = {
                 });
             }
         })
-        if(ignore) return;
+        if(ignore) return false;
+
         // Расчет физических свойств после взаимодействия. 
         const spdSum = Math.sqrt(                                                                                           // Расчет суммы скоростей пары объектов для дальнейшего вычисления воздействия на их свойство health.
                 Math.pow(objs[pair[0]].paramsVariable.currentSpeed[0] - objs[pair[1]].paramsVariable.currentSpeed[0], 2) +
@@ -650,14 +700,15 @@ const library = {
             );
         const damage = [                                                                                                    // Расчет величин воздействия на св-во health объектов. (Энергия воздейсвия / прочность противоположного объекта)
             objs[pair[0]].paramsConst.energyСharge
-                ? objs[pair[0]].paramsConst.energyСharge    / objs[pair[1]].paramsConst.durability                          // Если для объекта существует параметр енергетической вооруженности (обычно для снарядов).
-                : objs[pair[0]].paramsConst.weight * spdSum / objs[pair[1]].paramsConst.durability,                         // Если у объекта нет параметра энерговооруженности, его сила воздействия рассчитывается по массе и скорости.
+                ? objs[pair[0]].paramsConst.energyСharge    / (objs[pair[1]].paramsConst.durability || 0.1)                  // Если для объекта существует параметр енергетической вооруженности (обычно для снарядов).
+                : objs[pair[0]].paramsConst.weight * spdSum / (objs[pair[1]].paramsConst.durability || 0.1),                 // Если у объекта нет параметра энерговооруженности, его сила воздействия рассчитывается по массе и скорости.
             objs[pair[1]].paramsConst.energyСharge
-                ? objs[pair[1]].paramsConst.energyСharge    / objs[pair[0]].paramsConst.durability
-                : objs[pair[1]].paramsConst.weight * spdSum / objs[pair[0]].paramsConst.durability,
+                ? objs[pair[1]].paramsConst.energyСharge    / (objs[pair[0]].paramsConst.durability || 0.1)
+                : objs[pair[1]].paramsConst.weight * spdSum / (objs[pair[0]].paramsConst.durability || 0.1),
         ];
         objs[pair[0]].paramsVariable.health -= damage[1],
         objs[pair[1]].paramsVariable.health -= damage[0]
+        return true;
     }
 
 

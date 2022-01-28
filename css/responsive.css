@@ -1,3 +1,11 @@
+@media (min-width: 2000px) {
+    #local .buttons, 
+    #online .buttons,
+    #settings .buttons  {
+        margin: 0 calc(50% - 1096px);
+    }
+}
+
 @media (max-width: 1440px) {
     /* MENU */
     #mainmenu .menu .logo img {
@@ -11,10 +19,24 @@
         margin: 0 0 15px;
     }
     
+    .list table {
+        min-width: auto;
+    }
+
+    #hangar .ships {
+        max-width: 1000px;
+        margin: auto;
+    }
 }
 
 
 @media (max-width: 1024px) {
+    #local.wrapper,
+    #online.wrapper,
+    #settings.wrapper,
+    #hangar.wrapper {
+        height: auto;
+    }
     /* MENU */
     #mainmenu .menu {
         width: auto;
@@ -23,6 +45,35 @@
         max-width:50%;
     }
 
+    #online .servers {
+        margin-top: 70px;
+    }
+
+    #online .servers .sets {
+        width: 100%;
+        max-width: 360px;
+    }
+    #online .servers .sets[data-setname="available"] {
+        width: 100%;
+        max-width: 740px;
+    }
+    #online .servers > .buttons {
+        justify-content: center;
+    }
+
+
+    /* SETTINGS */
+    #settings .sets {
+        width: 100%;
+        max-width: 360px;
+    }
+    #settings .sets[data-setname="control"] {
+        width: 100%;
+        max-width: 740px;
+    }
+    #settings .buttons {
+        justify-content: center;
+    }
 }
 
 @media (max-width: 768px) {
@@ -90,6 +141,38 @@
         padding-bottom: 30px;
     }
 
+
+    /* ONLINE */
+    #online .list table tr td:nth-of-type(3),
+    #online .list table tr td:nth-of-type(5) {display: none;}
+    /* SETTINGS */
+    #settings .list table tr td:nth-of-type(4),
+    #settings .list table tr td:nth-of-type(5) {display: none;}
+    #settings .list table tr:nth-of-type(n+2) td:nth-of-type(n+2){
+        font-size: 80%;
+    }
+    #settings .list table td {
+        overflow: hidden;
+        max-width: 70px;
+    }
+    /* HANGAR */
+    #hangar .ships .mod {
+        min-width: auto;
+        width: 340px;
+    }
+
 }
 
 
+@media (max-width: 768px) and (max-height:590px){
+    #mainmenu .illuminator {
+        display: none;
+    }
+}
+
+@media (max-height:590px){
+    /* GAMESCREEN */
+    #gamescreen .dashboard {
+        padding: 0 20px;
+    }
+}

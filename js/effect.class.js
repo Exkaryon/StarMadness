@@ -24,15 +24,15 @@ class effect {
         ['location', 'currentSpeed', 'deg'].forEach(paramName => {                                          // Передача ссылок требуемых изменяемых свойств от объекта источника эффекта. 
             this.paramsVariable[paramName] = sourceObj.paramsVariable[paramName];
         });
-        Object.assign(                                                                                      // Получение из конфига свойств эффекта, выбранного случайно из списка названий эффектов в объекте источнике, соответсвенно переданному типу эффекта.
-            this,
-            config.effectMods[sourceObj.paramsConst.effects[effectType][library.randomizer(0, sourceObj.paramsConst.effects[effectType].length - 1)]]
-        ); 
+        const effectName = sourceObj.paramsConst.effects[effectType][library.randomizer(0, sourceObj.paramsConst.effects[effectType].length - 1)];  // Получение имени эффекта из списка названий эффектов в объекте источнике, соответсвенно переданному типу эффекта.
+        for (const prop in config.effectMods[effectName]) {                                                 // Двухуровневое клонирование свойств из конфига. Здесь копирование требуется, чтобы одинаковые эффекты не ссылались на один и тот же объект а имели свои св-ва.
+                this[prop] = (typeof config.effectMods[effectName][prop] == 'object')
+                            ? Object.assign({}, config.effectMods[effectName][prop])
+                            : config.effectMods[effectName][prop];
+        }
         if(this.paramsConst.textureLifeTime) this.paramsConst.texture = config.textures[sourceObj.model];   // Передача ссылки на текстуру объекта источника. Требуется для того, чтобы дорисовывать текстуру объекта в эффект, когда сам объект-источник уже удален. 
-
-
-        if(sourceObj.paramsConst.durability < 2 && sourceObj.paramsConst.weight < 10) {                     // Если объект-источник достаточно легкий и малопрочный, принято считать, что образуемый им эффект наследует свойства скорости от противопоставленного объекта, то есть как бы прилипает к нему...
-            if(oppoObj.paramsConst.durability >= 2 && oppoObj.paramsConst.weight >= 10) {                     // ...но только в том случае, если сам противопоставленный объект не является таким же легким и малопрочным.
+        if((sourceObj.paramsConst.durability < 2 || sourceObj.paramsConst.durability === Infinity) && sourceObj.paramsConst.weight < 10) {  // Если объект-источник достаточно легкий и малопрочный (или бесконечно прочный), принято считать, что образуемый им эффект наследует свойства скорости от противопоставленного объекта, то есть как бы прилипает к нему...
+            if(oppoObj.paramsConst.durability >= 2 && oppoObj.paramsConst.weight >= 10){                    // ...но только в том случае, если сам противопоставленный объект не является таким же легким и малопрочным.
                 this.paramsVariable.currentSpeed = oppoObj.paramsVariable.currentSpeed;
             }else{
                 this.paramsVariable.currentSpeed[0] /= oppoObj.paramsConst.weight > 4 ? oppoObj.paramsConst.weight : 4;
@@ -42,8 +42,6 @@ class effect {
             this.paramsVariable.currentSpeed[0] /= 2;
             this.paramsVariable.currentSpeed[1] /= 2;
         }
-
-
         this.init();
     }
 
@@ -55,17 +53,18 @@ class effect {
     init(){
         this.id = this.model+'_'+String(Date.now()).substring(7) + String(Math.random().toFixed(5)).substring(2);           // Генерация уникального идентификатора для объекта.
         let maxLifeTime = [];
-        if(this.visual){
-            this.paramsConst.sprites = config.sprites[this.model];                                                                                  // Отдается ссылка на конфиг спрайта. Клонирование не требуется, поскольку paramConst не претерпевает никаких изменений. 
+        if(!this.hidden){
+            this.paramsConst.sprites = config.sprites[this.model];                                                              // Отдается ссылка на конфиг спрайта. Клонирование не требуется, поскольку paramConst не претерпевает никаких изменений. 
             for (const spriteName in this.paramsConst.sprites) {
-                this.activeSprites[spriteName] = this.paramsConst.sprites[spriteName].defaultActive ? 0 : false;                                    // Если указана обработка спрайта по умолчанию, флаг меняется на счетчик кадров спрайта и устанавливается в ноль, который указывает рендеру необходимость обработки спрайта.
+                this.activeSprites[spriteName] = this.paramsConst.sprites[spriteName].defaultActive ? 0 : false;                // Если указана обработка спрайта по умолчанию, флаг меняется на счетчик кадров спрайта и устанавливается в ноль, который указывает рендеру необходимость обработки спрайта.
                 maxLifeTime.push(this.paramsConst.sprites[spriteName].frames * this.paramsConst.sprites[spriteName].interval);
             }
             this.paramsVariable.fullFieldSize = library.getFullFieldSize(this);
             this.activeActions.motion = true;
         }
-        this.paramsConst.lifeTime = this.paramsConst.lifeTime ? this.paramsConst.lifeTime : Math.max(...maxLifeTime);                               // Время жизни эффекта.
-        this.paramsVariable.lifeTime = this.paramsConst.lifeTime;                                                                                   // Установка счетчика существования.
+        this.paramsConst.lifeTime = this.paramsConst.lifeTime ? this.paramsConst.lifeTime : Math.max(...maxLifeTime);           // Время жизни эффекта.
+        this.paramsVariable.lifeTime = this.paramsConst.lifeTime;                                                               // Установка счетчика существования.
+        mediaLibrary.player('gameSound', this.sound);                                                                           // Воспроизведение звеку соответсвующего эффекту.
     }
 
 

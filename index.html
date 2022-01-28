@@ -9,25 +9,14 @@
     <link href="css/fonts.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/responsive.css" rel="stylesheet">
-    <link href="css/dev.css" rel="stylesheet">
 </head>
 <body>
-    
-    <div class="info">
-        <div id="win_1">...</div>
-        <div id="win_2">...</div>
-        <div id="win_3">
-            <button id="pause">Pause / Resume</button>
-        </div>
-        <div id="win_4">...</div>
-    </div>
-
 
     <div id="preloader" class="wrapper">
         <div class="progress">
             <div class="percents">0%</div>
             <div class="bar"><div>&nbsp;</div></div>
-            <div class="message"></div>
+            <div class="message">Подождите, загружаю медиа: ~27Мб...</div>
         </div>
         <div class="ready inactive">
             <h2>Всё готово для начала!</h2>
@@ -55,7 +44,7 @@
             </div>
         </div>
         <div class="illuminator">
-            <video poster="images/videoscreen.jpg" preload muted id="video1">
+            <video poster="images/videoscreen.jpg" preload muted id="video">
                 <source src="media/serenity.mp4" type="video/mp4">
             </video>
         </div>
@@ -77,16 +66,38 @@
 
 
     <div id="online" class="wrapper inactive">
-        <div class="title">
-            <div>Сетевая игра</div>
+        <div class="headline">
+            <h2>Сетевая игра</h2>
+            <div>Серверы</div>
+            <div class="version_notice"><span>В версии 1.01<sup>β</sup> сетевая игра недоступна!</span></div>
         </div>
+
         <!-- Доступные серверы -->
-        <!-- Создать сервер -->
+        <div class="servers">
+            <div class="sets" data-setname="new"></div>
+            <div class="sets" data-setname="available"></div>
+            <div class="buttons">
+                <button class="tomenu">В меню</button>
+            </div>
+        </div>
+
         <!-- Лобби сервера -->
     </div>
 
 
-    <div id="settings" class="wrapper inactive">Настройки</div>
+    <div id="settings" class="wrapper inactive">
+        <div class="headline">
+            <h2>Настройки</h2>
+            <div>общее</div>
+        </div>
+
+        <div class="sets" data-setname="media"></div>
+        <div class="sets" data-setname="control"></div>
+
+        <div class="buttons">
+            <button class="tomenu">В меню</button>
+        </div>
+    </div>
 
     
     <div id="hangar" class="wrapper inactive">
@@ -103,7 +114,6 @@
     </div>
     
     
-    <script src="js/dev.js"></script>
     <script src="js/config.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/dashboard.js"></script>
@@ -112,6 +122,7 @@
     <script src="js/spaceship.class.js"></script>
     <script src="js/bullet.class.js"></script>
     <script src="js/celestial_body.class.js"></script>
+    <script src="js/autopilot.class.js"></script>
     <script src="js/render.js"></script>
     <script src="js/dynamics.js"></script>
     <script src="js/media_library.js"></script>

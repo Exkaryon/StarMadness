@@ -1,11 +1,6 @@
 "use strict";
 
 
-
-
-
-
-
 /////////////////////////////
 ///// Класс — космолет. /////
 /////////////////////////////
@@ -24,12 +19,13 @@ class spaceShip {
         shotDelay: false,
         blink: false,
     };
+    soundLoops = {};                                            // Свойство, куда складываются звуковые петли (многократно повторяющиеся звуки) для объекта, например, звук работы двигателя.
     paramsVariable = {
         vertices: [],                                           // Координаты вершин объекта изменяемые в процессе «жизни» и применяемые для рендеринга слоя этого объекта.
         fulcrum: [0,0],                                         // Координаты опорной точки объекта (условный центр объекта). Если не установлено умолчание отличное от нуля, расчитывается при инициализации по вершинам. 
         interactionFieldSize: 0,                                // Размер поля взаимодействия объекта (зона, при соприкосновении с которой иного объекта, начинается детальные вычисления столкновений). Расчитывается при инициализации по вершинам.
-        fullFieldSize: 0,                                       // Размер поля (всего холста объекта), включая неактивную зону - место в котором могут отрисовываться спрайты или иные элементы так, чтобы они полностью вписались в это поле.
-        currentSpeed:[0,0],                                     // Текущая скорость X,Y
+        fullFieldSize: [0, 0],                                  // Размер поля (всего холста объекта), включая неактивную зону - место в котором могут отрисовываться спрайты или иные элементы так, чтобы они полностью вписались в это поле.
+        currentSpeed: [0,0],                                    // Текущая скорость X,Y
         location: [0,0],                                        // Текущее положение в пространстве X,Y
         deg: 0,                                                 // Градус поворота объекта
         health: 100,                                            // Процент целостности от 0 до 100.
@@ -38,7 +34,10 @@ class spaceShip {
         shot: 0,
         superShot: 0
     };
-
+    machineGunCounter = {
+        weapon: 0,
+        superWeapon: 0
+    };
 
 
       ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,8 +118,7 @@ class spaceShip {
             document.addEventListener('keydown', this['playerKeydownListener'+this.playerIndex]);
             document.addEventListener('keyup', this['playerKeyupListener'+this.playerIndex]);
         }else{
-            console.log('Инициализация AI для '+this.captain)
-            //this.controls = 'Neural Model';
+            this.autopilot = new Autopilot(this);
         }
     }
 
@@ -135,7 +133,7 @@ class spaceShip {
 
 
 
-    ///////////////////////////////
+      ///////////////////////////////
      /////// Метод ускорения ///////
     ///////////////////////////////
     impulse(){
@@ -159,12 +157,16 @@ class spaceShip {
                 }
             });
             this.activeActions.impulse = true;                                                              // Флаг, указывающий объекту Вселенной необходимость обработки данного метода.
-            this.activeSprites.engine = this.activeSprites.engine || 0;                                     // Разрешение обработки спрайта начиная с нулевого (первого) кадра или текущего, если он уже был разрешен.
+            if(this.activeSprites.engine === false){                                                        // Разрешение обработки спрайта двигателя начиная с нулевого (первого) кадра и проигрывание звука двигателя.
+                this.activeSprites.engine = 0;
+                mediaLibrary.soundLoopPlayer('engine', true, this);
+            }
             this.redraw = true;                                                                             // Разрешение перерисовки объекта рендером.
         }else{
             if(this.activeActions.impulse){                                                                 // Условие для того, чтобы после деактивации метода произошла еще одна перерисовка объекта для корректной визуализации соответсвующей состоянию объекта.
                 this.activeActions.impulse = false;
                 this.activeSprites.engine = false;
+                mediaLibrary.soundLoopPlayer('engine', false, this);
                 this.redraw = true;
             }
         }
@@ -217,25 +219,37 @@ class spaceShip {
     shot(supershot){
         const methodName = supershot ? 'superShot' : 'shot'; 
         const weaponType = supershot ? 'superWeapon' : 'weapon'; 
-        // Проверяется разрешение на стрельбу.
+        // Проверка разрешения на стрельбу по счетчику интервалов выстрелов.
         if(this.shotDelayCounter[methodName]){
             this.activeActions[methodName] = false;
             return;
         };
-        // Устанавливается счетчик ограничения частоты выстрелов и создается новый объект пули, который добавляется во Вселенную.
-        this.shotDelayCounter[methodName] = this.paramsConst[weaponType][1];
-        universe.objects.push(
-            new bullet(
-                config.bulletMods[this.paramsConst[weaponType][0]],
-                this.id,
-                Object.assign(
-                    {},
-                    this.paramsVariable,
-                    {muzzleDist: this.paramsConst.muzzleDist}
+        // Устанавливается счетчик ограничения частоты выстрелов.
+        this.shotDelayCounter[methodName] = this.paramsConst[weaponType].delay;
+        // Запуск пулеметной очереди, если оружие является пулеметным.
+        if(this.paramsConst[weaponType].machineGun && !this.machineGunCounter[weaponType]){
+            this.machineGunFire(weaponType);
+            this.activeActions[methodName] = false;
+            return;
+        }
+        // Cоздается новый объект пули, который добавляется во Вселенную.
+        const bifurcation = this.paramsConst[weaponType].muzzleDist[1] ? [1,-1]: [1];   // Если свойство по Y не равно 0, тогда происходит двойное симметричное создание пуль.
+        bifurcation.forEach(el => {
+            universe.objects.push(
+                new bullet(
+                    config.bulletMods[this.paramsConst[weaponType].mod],
+                    this.id,
+                    Object.assign(
+                        {},
+                        this.paramsVariable,
+                        {muzzleDist: [this.paramsConst[weaponType].muzzleDist[0], this.paramsConst[weaponType].muzzleDist[1] * el]}
+                    )
                 )
-            )
-        );
+            );
+        });
         this.activeActions[methodName] = false;
+        // Запуск проигрывания звука оружия.
+        mediaLibrary.player('gameSound', this.paramsConst[weaponType].mod);
     }
 
 
@@ -257,9 +271,34 @@ class spaceShip {
         if(this.shotDelayCounter.superShot){
             this.shotDelayCounter.superShot--;
             if(universe.quantCounter % 15 && this.shotDelayCounter.superShot > 1) return;
-            dashboard.update(this.playerIndex, 'energy', Math.round((this.paramsConst.superWeapon[1] - this.shotDelayCounter.superShot) * 100 / this.paramsConst.superWeapon[1]));
+            dashboard.update(this.playerIndex, 'energy', Math.round((this.paramsConst.superWeapon.delay - this.shotDelayCounter.superShot) * 100 / this.paramsConst.superWeapon.delay));
         }
+    }
 
+
+
+      ////////////////////////////////////
+     ///// Метод пулеметной очереди /////
+    ////////////////////////////////////
+    machineGunFire(weaponType){
+        if(weaponType){                                                                             // Запуск счетчика пулеметной очереди.
+            this.machineGunCounter[weaponType] = this.paramsConst[weaponType].machineGun[0] * this.paramsConst[weaponType].machineGun[1];
+            this.activeActions.machineGunFire = true;
+        }else{
+            for (const wType in this.machineGunCounter) {                                           // Обработка счетчиков пулеметной очереди.
+                if(this.machineGunCounter[wType] > 0){
+                    if(!(this.machineGunCounter[wType] % this.paramsConst[wType].machineGun[1])){
+                        const methodName = wType == 'superWeapon' ? 'superShot' : 'shot';
+                        this.activeActions[methodName] = true;                                      // Разрешение на обработку метода выстрела.
+                        this.shotDelayCounter[methodName] = 0;                                      // Сброс счетчика задержки выстрела, чтобы очередные пули могли быть созданы. 
+                    }
+                    this.machineGunCounter[wType]--;
+                }
+            }
+            if(this.machineGunCounter.weapon <= 0 && this.machineGunCounter.superWeapon <= 0){     // Завершение пулеметной очереди, когда счетчик исчерпан.
+                this.activeActions.machineGunFire = false;
+            }
+        }
     }
 
 
@@ -291,6 +330,22 @@ class spaceShip {
                 }
             }
         }
+    }
+
+
+
+      ////////////////////////////////////////////////////////////////
+     /////// Метод подготовки объекта к удалению из Вселенной ///////
+    ////////////////////////////////////////////////////////////////
+    destruction(universeCollapse){
+        for (const loopName in this.soundLoops){                                                    // Остановка всех звуковых петель для случаев, когда космолет извлекается из Вселенной, но петля ещё проигрывается.
+            this.soundLoops[loopName].stop();
+        }
+        document.removeEventListener('keydown', this['playerKeydownListener' + this.playerIndex]);  // Удаление слушателей событий для объекта.
+        document.removeEventListener('keyup', this['playerKeydownListener' + this.playerIndex]);
+        if(universeCollapse) return;                                                                // Если разрушается Вселенная, то обновление конфига и дашборда не требуется.
+        config.gameSettings.players[this.playerIndex].shipMods.shift();                             // Обновление состава флота в конфиге для пользователя.
+        dashboard.update(this.playerIndex, 'shipdestroy');                                          // Обновление данных пользователя на дашборде (для декримента коллекции космолетов)
     }
 
 

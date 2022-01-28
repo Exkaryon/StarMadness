@@ -49,7 +49,8 @@ const dashboard = {
         pauseBox: `
             <div class="pausebox">
                 <div>Пауза</div>
-                <button class="blue">В лобби</button>
+                <button class="blue mini lobby">В лобби</button> &nbsp;
+                <button class="blue mini game">В игру</button>
             </div>
         `,
     },
@@ -66,7 +67,9 @@ const dashboard = {
             this.elements.playersHealt[key] = element.querySelector('.healt > div > div');
             this.elements.playersEnergy[key] = element.querySelector('.energy > div > div');
             this.elements.playersFleet[key] = element.querySelector('.fleet');
+            element.style.transform = universe.spaceScale < 1 ? ' scale('+universe.spaceScale+')' : ' scale(1)';
         });
+        
     },
 
 
@@ -83,7 +86,7 @@ const dashboard = {
                             .replace(/{{ fleet }}/g, function(){
                                 let shipsList = '';
                                 player.shipMods.forEach((mod, k) => {
-                                    shipsList += '<div data-mod="'+mod+'" class="'+(!k ? 'active' : '')+'"></div>';
+                                    shipsList += '<div data-mod="'+mod+'" class="'+(!k ? 'active' : '')+'" style="background-image: url('+config.textures[mod].pic.src+')"></div>';
                                 });
                                 return shipsList;
                             });
@@ -109,6 +112,7 @@ const dashboard = {
                 break;
             case 'gameover':
                 this.elements.players[playerIndex].classList.add('gameover');
+                this.elements.players[playerIndex].style.transform += ' translateY(250px) rotate(-50deg)';
                 break;
             case 'energy':
                 this.elements.playersEnergy[playerIndex].style.width = value + '%';
@@ -119,7 +123,7 @@ const dashboard = {
 
     showWinner: function(hide){
         if(!hide){
-            if(universe.winnerIndex == null){
+            if(universe.winnerIndex === null){
                 this.elements.basis.insertAdjacentHTML('beforebegin', this.templates.draw);
             }else{
                 this.elements.basis.insertAdjacentHTML('beforebegin', this.templates.victory.replace(/{{ captain }}/g, config.gameSettings.players[universe.winnerIndex].captain));
@@ -131,16 +135,13 @@ const dashboard = {
     },
 
 
-
     showPauseBox: function(tumbler){
+        if(this.elements.pauseBox) this.elements.pauseBox.remove();
         if(tumbler){
             this.elements.basis.insertAdjacentHTML('beforebegin', this.templates.pauseBox);
-            document.querySelector('#gamescreen .pausebox button').addEventListener('click', function(){
-                universe.stopGameplay(true);
-                document.removeEventListener('click', universe.stopGameplay);
-            })
-        }else{
-            document.querySelector('#gamescreen .pausebox').remove();
+            this.elements.pauseBox = document.querySelector('#gamescreen .pausebox');
+            this.elements.pauseBox.querySelector('button.lobby').addEventListener('click', () => universe.stopGameplay(true), {once: true});
+            this.elements.pauseBox.querySelector('button.game').addEventListener('click', () => universe.pause({code: config.gameSettings.gameplay.pauseKey}), {once: true});
         }
     },
 
