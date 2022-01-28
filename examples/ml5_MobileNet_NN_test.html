@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+</head>
+<body>
+    <img src="https://trinixy.ru/pics3/20080801/podb/11/ptici_02.jpg" alt="" id="image">
+    <div id="res"></div>
+    <div id="probability"></div>
+
+
+
+</body>
+<script>
+    const image = document.getElementById('image'); 
+    const result = document.getElementById('res'); 
+    const probability = document.getElementById('probability'); 
+
+    ml5.imageClassifier('MobileNet')
+            .then(classifier => classifier.classify(image))
+            .then(results => {
+                console.log(results);
+                result.innerText = results[0].label;
+                probability.innerText = (results[0].confidence * 100).toFixed(2)+ '%';
+            });
+</script>
+</html>

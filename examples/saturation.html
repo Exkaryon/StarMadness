@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<style>body {background: #ccc; font-size:44px; color:rgba(0,0,0,0.5)}</style>
+</head>
+<body>
+    
+
+
+    <script>
+ 
+ window.onload = function() {
+
+    // at this stage the image has loaded:
+    var img = document.getElementById("img");
+    var mask = document.getElementById("mask");
+    var canvas = document.getElementById("c");
+    var ctx = canvas.getContext("2d");
+
+    // - setup canvas to match image
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+
+    // - draw image
+    ctx.drawImage(mask, 0, 0);
+    ctx.globalCompositeOperation = "source-in";
+    ctx.fillStyle = '#f90';
+    ctx.fillRect(0, 0, img.width, img.height);
+    ctx.globalCompositeOperation = "source-over";
+
+
+    ctx.filter = 'hue-rotate(120deg)';
+    ctx.drawImage(img, 0, 0);
+
+
+};
+    </script>
+
+
+<img id="img" src="../images/gameplay/ranger.png">
+<img id="mask" src="../images/gameplay/ranger-mask.png"> ► 
+<canvas id="c"></canvas>
+
+</body>
+</html>
