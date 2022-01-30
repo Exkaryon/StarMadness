@@ -123,7 +123,7 @@ const dashboard = {
 
     showWinner: function(hide){
         if(!hide){
-            if(universe.winnerIndex === null){
+            if(!universe.winnerIndex && universe.winnerIndex !== 0){
                 this.elements.basis.insertAdjacentHTML('beforebegin', this.templates.draw);
             }else{
                 this.elements.basis.insertAdjacentHTML('beforebegin', this.templates.victory.replace(/{{ captain }}/g, config.gameSettings.players[universe.winnerIndex].captain));

@@ -135,7 +135,7 @@ const mediaLibrary = {
         }
 
         percent = Math.round(percent);
-        this.preloader.progress.children[2].textContent = errorClass == 'error' ? `Продолжаю загрузку...` : `Некоторе файлы недоступны...`;
+        this.preloader.progress.children[2].textContent = errorClass == 'fatal_error' ? `Некоторе файлы недоступны...` : `Продолжаю загрузку...`;
         this.preloader.progress.children[0].textContent = percent + '%';
         this.preloader.progress.children[1].children[0].style.width = percent + '%';
     },
