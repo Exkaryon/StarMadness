@@ -74,6 +74,46 @@
     #settings .buttons {
         justify-content: center;
     }
+
+    /* GAMESCREEN */
+    #gamescreen .dashboard > div {
+        padding: 10px 0px;
+        min-width: auto;
+    }
+    #gamescreen .dashboard .avatar {
+        width: 30px;
+        height: 30px;
+    }
+    #gamescreen .dashboard .stat {
+        margin-left: 8px;
+        width: 100px;
+    }
+    #gamescreen .dashboard .name {
+        font-weight: 400;
+        font-size: 90%;
+    }
+    #gamescreen .dashboard .progress {
+        font-size: 11px;
+    }
+    #gamescreen .dashboard .progress > div:last-child {
+        height: 7px;
+        width: 40px;
+    }
+
+    #gamescreen .dashboard .progress > div:last-child > div {
+        height: 5px;
+    }
+    #gamescreen .dashboard .progress > div:last-child > div > div {
+        height: 5px;
+    }
+    #gamescreen .dashboard .fleet > div {
+        width: 20px;
+        height: 20px;
+    }
+    #gamescreen .dashboard .fleet > div,
+    #gamescreen .dashboard .fleet > div.active {
+        border: none;
+    }
 }
 
 @media (max-width: 768px) {

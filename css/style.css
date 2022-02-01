@@ -1229,6 +1229,7 @@ button.mini::after {display: none;}
 }
 
 #gamescreen .dashboard > div.gameover {
+    transform: translateY(250px) rotate(-50deg);
     opacity: 0;
 }
 #gamescreen .dashboard .avatar {

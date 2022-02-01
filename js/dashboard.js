@@ -67,7 +67,6 @@ const dashboard = {
             this.elements.playersHealt[key] = element.querySelector('.healt > div > div');
             this.elements.playersEnergy[key] = element.querySelector('.energy > div > div');
             this.elements.playersFleet[key] = element.querySelector('.fleet');
-            element.style.transform = universe.spaceScale < 1 ? ' scale('+universe.spaceScale+')' : ' scale(1)';
         });
         
     },
@@ -112,7 +111,6 @@ const dashboard = {
                 break;
             case 'gameover':
                 this.elements.players[playerIndex].classList.add('gameover');
-                this.elements.players[playerIndex].style.transform += ' translateY(250px) rotate(-50deg)';
                 break;
             case 'energy':
                 this.elements.playersEnergy[playerIndex].style.width = value + '%';
