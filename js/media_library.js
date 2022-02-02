@@ -280,11 +280,27 @@ const mediaLibrary = {
     /////////////////////////////////////////////////////////////////
     showStartButton(){
         if(this.loadedItems < this.totalItems) return;
-        this.preloader.progress.classList.add('inactive');
-        this.preloader.ready.classList.remove('inactive');
-        this.preloader.ready.children[1].addEventListener('click', (e) => {
-            menu.init();
-        }, {once: true})
+        const button = () => {
+            this.preloader.progress.classList.add('inactive');
+            this.preloader.ready.classList.remove('inactive');
+            this.preloader.ready.children[1].addEventListener('click', (e) => {
+                menu.init();
+            }, {once: true})
+        }
+        try {
+            mediaLibrary.sounds.alienInvasionAlt.play();
+            setTimeout(() => {
+                if(mediaLibrary.playingMusic.ctx.currentTime){
+                    mediaLibrary.playingMusic.stop();
+                    menu.init();
+                }else{
+                    button();
+                }
+            }, 100);
+        } catch (error) {
+            console.warn('Звук alienInvasionAlt не найден!');
+            button();
+        }
     }
 
 }
