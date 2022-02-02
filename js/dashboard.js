@@ -121,6 +121,7 @@ const dashboard = {
 
     showWinner: function(hide){
         if(!hide){
+            if(document.querySelector('#gamescreen .victory')) this.showWinner('hide');
             if(!universe.winnerIndex && universe.winnerIndex !== 0){
                 this.elements.basis.insertAdjacentHTML('beforebegin', this.templates.draw);
             }else{
