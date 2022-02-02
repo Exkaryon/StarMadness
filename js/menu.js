@@ -230,7 +230,7 @@ const menu = {
                         case 'multiplayer': menu.show('local');     break;
                         case 'online':      menu.show('online');    break;
                         case 'settings':    menu.show('settings');  break;
-                        case 'exit':        window.close();         break;
+                        case 'exit':        menu.closeApp();        break;
                     }
                 });
             });
@@ -767,6 +767,15 @@ const menu = {
             r += `</tr>`;
         }
         return `<table><tr class="ttl"><td>Действие</td><td>Player 1</td><td>Player 2</td><td>Player 3</td><td>Player 4</td></tr>${r}</table>`;
+    },
+
+
+
+    closeApp: function(){
+        window.close();
+        setTimeout(() => {
+            window.location.replace("https://exkaryon.ru/");
+        }, 100);
     }
 
 }
