@@ -291,12 +291,12 @@ const mediaLibrary = {
             mediaLibrary.sounds.alienInvasionAlt.play();
             setTimeout(() => {
                 if(mediaLibrary.playingMusic.ctx.currentTime){
-                    mediaLibrary.playingMusic.stop();
                     menu.init();
                 }else{
                     button();
                 }
-            }, 100);
+				mediaLibrary.playingMusic.stop();
+			}, 100);
         } catch (error) {
             console.warn('Звук alienInvasionAlt не найден!');
             button();
