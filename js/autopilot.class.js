@@ -4,7 +4,7 @@ class Autopilot {
     targetObjIndex = null;              // Индекс выбранного объекта Вселенной для прицеливания.
     
     rageMode = {
-        permit: false,                  // Режим разрешен (true) или нет (false).
+        permit: false,                  // Разрешение для режима
         flow: false,
         start: 0,                       // Начало обработки события в квантах.
         end: 0,                         // Конец обработки события в квантах.
